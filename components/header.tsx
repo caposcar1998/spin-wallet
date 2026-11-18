@@ -3,16 +3,17 @@ import { logout } from "@/components/actions";
 import Image from "next/image";
 import spinLogo from "@/public/spin.jpeg";
 import { Suspense } from "react";
-import { Title } from "@/components/title";
+import { Title } from "@/components/general/title";
+import { GeneralText } from "./general/generalText";
 
 export function Header() {
   return (
-    <header className="flex items-center justify-between p-4 bg-blue-500">
+    <header className="flex items-center justify-between p-4 bg-secondary">
       <div className="flex items-center gap-2">
         <Image src={spinLogo} alt="Spin wallet" width={50} height={50} />
         <Title size="sm">Spin wallet</Title>
       </div>
-      <Suspense fallback={<h2>La cartera de tus sueños</h2>}>
+      <Suspense fallback={<GeneralText>La cartera de tus sueños</GeneralText>}>
         <HeaderSession />
       </Suspense>
     </header>
@@ -24,9 +25,11 @@ async function HeaderSession() {
 
   return session ? (
     <form action={logout}>
-      <button type="submit">Logout</button>
+      <button type="submit">
+        <GeneralText>Logout</GeneralText>
+      </button>
     </form>
   ) : (
-    <h2>La cartera de tus sueños</h2>
+    <GeneralText>La cartera de tus sueños</GeneralText>
   );
 }

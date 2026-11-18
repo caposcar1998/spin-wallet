@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertProps } from "@/types/types";
+import { CloseButton } from "./general/closeButton";
 
 export function Alert({ type, isOpen, onClose, children }: AlertProps) {
   if (!isOpen) {
@@ -10,14 +11,9 @@ export function Alert({ type, isOpen, onClose, children }: AlertProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div
-        className={`relative w-full max-w-md rounded-xl ${type === "success" ? "bg-green-500" : type === "error" ? "bg-red-500" : type === "warning" ? "bg-yellow-500" : "bg-blue-500"} p-6 shadow-xl`}
+        className={`relative w-full max-w-md rounded-xl ${type === "success" ? "bg-green-500" : type === "error" ? "bg-red-500" : type === "warning" ? "bg-yellow-500" : "bg-secondary"} p-6 shadow-xl`}
       >
-        <button
-          onClick={onClose}
-          className="absolute right-4 top-4 text-gray-500 hover:text-white"
-        >
-          ✕
-        </button>
+        <CloseButton onClick={onClose || (() => {})} />
 
         {children}
       </div>

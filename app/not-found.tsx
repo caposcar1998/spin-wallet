@@ -1,6 +1,6 @@
 import Image from "next/image";
 import notFoundImage from "@/public/spin-not-found.png";
-import { Title } from "@/components/title";
+import { Title } from "@/components/general/title";
 export default function NotFound() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center">

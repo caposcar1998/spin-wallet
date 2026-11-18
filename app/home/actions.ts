@@ -1,4 +1,5 @@
 import { apiGet } from "@/lib/api";
+import { cacheLife, cacheTag } from "next/cache";
 
 export interface Movement {
   id: number;
@@ -23,6 +24,9 @@ export async function getUsers(): Promise<User[]> {
 }
 
 export async function getUser(id: string): Promise<User> {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("user");
   const response = await apiGet(`/user/${id}`);
   const body = await response.json();
   return body.data;

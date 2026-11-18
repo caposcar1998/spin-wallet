@@ -1,4 +1,4 @@
-import { CustomButton } from "@/components/button";
+import { CustomButton } from "@/components/general/button";
 import Link from "next/link";
 
 export default function Main() {

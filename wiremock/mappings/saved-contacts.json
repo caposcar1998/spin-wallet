@@ -1,0 +1,27 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/saved-contacts"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "success": true,
+      "data": [
+        {
+          "id": 1,
+          "name": "hector",
+          "email": "hector@example.com"
+        },
+        {
+          "id": 2,
+          "name": "salmay",
+          "email": "salmay@example.com"
+        }
+      ]
+    }
+  }
+}

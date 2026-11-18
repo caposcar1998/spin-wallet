@@ -2,7 +2,7 @@
 
 import { getSession } from "@/lib/session";
 import { getUser } from "@/app/home/actions";
-import { Title } from "@/components/title";
+import { Title } from "@/components/general/title";
 
 export default async function UserData() {
   const session = await getSession();

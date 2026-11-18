@@ -1,11 +1,11 @@
 "use server";
 
 import Link from "next/link";
-import { CustomButton } from "../button";
+import { CustomButton } from "../general/button";
 import TableMovements from "./tableMovements";
 import { getSession } from "@/lib/session";
 import { getUser } from "@/app/home/actions";
-import { Title } from "@/components/title";
+import { Title } from "@/components/general/title";
 
 export default async function Movements() {
   const session = await getSession();
@@ -13,12 +13,12 @@ export default async function Movements() {
 
   return (
     <div>
-      <Title>Movements</Title>
+      <Title>Movimientos</Title>
 
-      <div className="relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default">
+      <div className="relative bg-white shadow-sm rounded-lg border border-gray-200">
         <TableMovements movements={user?.movements ?? []} />
       </div>
-      <div className="flex justify-center">
+      <div className="flex justify-center mt-15">
         <Link href="/transactions">
           <CustomButton message="Nueva transacción" />
         </Link>

@@ -1,52 +1,90 @@
 import Link from "next/link";
-import { CustomButton } from "../button";
+import { CustomButton } from "../general/button";
 import { Movement } from "@/app/home/actions";
+import { GeneralText } from "../general/generalText";
 
 export default function TableMovements({
   movements,
 }: {
   movements: Movement[];
 }) {
+  if (movements.length === 0) {
+    return (
+      <p className="px-6 py-8 text-center text-sm text-gray-600">
+        No hay movimientos
+      </p>
+    );
+  }
+
   return (
-    <table className="w-full text-sm text-left rtl:text-right text-body">
-      <thead className="text-sm text-body bg-neutral-secondary-soft border-b rounded-base border-default">
-        <tr>
-          <th scope="col" className="px-6 py-3 font-medium">
-            Descripción
-          </th>
-          <th scope="col" className="px-6 py-3 font-medium">
-            Monto
-          </th>
-          <th scope="col" className="px-6 py-3 font-medium">
-            Fecha
-          </th>
-          <th scope="col" className="px-6 py-3 font-medium">
-            Revisar
-          </th>
-        </tr>
-      </thead>
-      <tbody>
+    <>
+      {/* Mobile: stacked cards */}
+      <ul className="md:hidden divide-y divide-gray-200">
         {movements.map((movement) => (
-          <tr
-            key={movement.id}
-            className="bg-neutral-primary border-b border-default last:border-0"
-          >
-            <th
-              scope="row"
-              className="px-6 py-4 font-medium text-heading whitespace-nowrap"
-            >
-              {movement.description}
-            </th>
-            <td className="px-6 py-4">${movement.amount}</td>
-            <td className="px-6 py-4">{movement.date}</td>
-            <td className="px-6 py-4">
+          <li key={movement.id} className="p-4">
+            <h3 className="font-medium text-gray-900">{movement.description}</h3>
+            <div className="mt-2 flex flex-col gap-1 text-sm text-gray-600">
+              <p>
+                <span className="font-medium">Monto:</span> ${movement.amount}
+              </p>
+              <p>
+                <span className="font-medium">Fecha:</span> {movement.date}
+              </p>
+            </div>
+            <div className="mt-3">
               <Link href={`/transactions/${movement.id}`}>
                 <CustomButton message="Ver" />
               </Link>
-            </td>
-          </tr>
+            </div>
+          </li>
         ))}
-      </tbody>
-    </table>
+      </ul>
+
+      {/* Desktop and up: table */}
+      <table className="hidden md:table w-full text-sm text-left rtl:text-right text-gray-600">
+        <thead className="text-sm text-gray-600 bg-primary border-b border-gray-200">
+          <tr>
+            <th scope="col" className="px-6 py-3 font-medium">
+              <GeneralText>Descripción</GeneralText>
+            </th>
+            <th scope="col" className="px-6 py-3 font-medium">
+              <GeneralText>Monto</GeneralText>
+            </th>
+            <th scope="col" className="px-6 py-3 font-medium">
+              <GeneralText>Fecha</GeneralText>
+            </th>
+            <th scope="col" className="px-6 py-3 font-medium">
+              <GeneralText>Revisar</GeneralText>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {movements.map((movement) => (
+            <tr
+              key={movement.id}
+              className="bg-white border-b border-gray-200 last:border-0"
+            >
+              <th
+                scope="row"
+                className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
+              >
+                <GeneralText>{movement.description}</GeneralText>
+              </th>
+              <td className="px-6 py-4">
+                <GeneralText>${movement.amount}</GeneralText>
+              </td>
+              <td className="px-6 py-4">
+                <GeneralText>{movement.date}</GeneralText>
+              </td>
+              <td className="px-6 py-4">
+                <Link href={`/transactions/${movement.id}`}>
+                  <CustomButton message="Ver" />
+                </Link>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
   );
 }
