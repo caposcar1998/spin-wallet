@@ -1,5 +1,5 @@
 const API_BASE_URL = process.env.USERS_API_BASE_URL ?? "http://localhost:8080";
-const random = Math.random() * 25;
+const random = 13;
 export async function apiGet(path: string) {
   return fetch(`${API_BASE_URL}${path}?random=${random}`, { cache: "no-store" });
 }

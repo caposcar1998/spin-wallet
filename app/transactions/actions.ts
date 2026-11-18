@@ -31,7 +31,12 @@ export async function sendTransaction(
   });
 
   updateTag("user");
-  redirect(`/transactions/confirmation/${response.status}/123456`);
+  const params = new URLSearchParams({
+    cantidad: String(amount),
+    motivo: String(motivo).trim(),
+    contacto: String(contacto ?? ""),
+  });
+  redirect(`/transactions/confirmation/${response.status}/123456?${params}`);
 }
 
 export interface SavedContact {

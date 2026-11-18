@@ -19,7 +19,6 @@ clean:
 
 dev:
 	docker compose up -d wiremock
-	sleep 5
 	npm run dev
 
 build:
