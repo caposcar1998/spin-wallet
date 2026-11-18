@@ -1,0 +1,22 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/user/[0-9]+/movements"
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "success": true,
+      "data": {
+        "id": "{{randomValue length=2 type='NUMERIC'}}",
+        "description": "{{jsonPath request.body '$.motivo'}}",
+        "amount": "{{jsonPath request.body '$.cantidad'}}",
+        "date": "2026-02-02"
+      }
+    },
+    "transformers": ["response-template"]
+  }
+}
