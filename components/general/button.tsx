@@ -17,7 +17,7 @@ export function CustomButton({
   return (
     <button
       {...props}
-      className={`bg-buttons hover:bg-hover disabled:opacity-50 text-white font-bold py-2 px-4 rounded-full ${className ?? ""}`}
+      className={`bg-primary hover:bg-primary-dark disabled:opacity-50 text-white font-semibold py-2.5 px-5 rounded-full shadow-md transition-all hover:shadow-lg cursor-pointer ${className ?? ""}`}
       onClick={onClick}
       data-testid={testId}
     >

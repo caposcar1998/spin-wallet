@@ -8,12 +8,14 @@ import { GeneralText } from "./general/generalText";
 
 export function Header() {
   return (
-    <header className="flex items-center justify-between p-4 bg-secondary">
+    <header className="flex items-center justify-between px-6 py-3 bg-primary shadow-md">
       <div className="flex items-center gap-2">
-        <Image src={spinLogo} alt="Spin wallet" width={50} height={50} />
-        <Title size="sm">Spin wallet</Title>
+        <a href="/">
+          <Image src={spinLogo} alt="Spin wallet" width={44} height={44} className="rounded-lg" />
+          <Title size="sm" className="text-white">Spin wallet</Title>
+        </a>
       </div>
-      <Suspense fallback={<GeneralText>La cartera de tus sueños</GeneralText>}>
+      <Suspense fallback={<GeneralText className="text-white/80">La cartera de tus sueños</GeneralText>}>
         <HeaderSession />
       </Suspense>
     </header>
@@ -25,11 +27,15 @@ async function HeaderSession() {
 
   return session ? (
     <form action={logout}>
-      <button type="submit" data-testid="logout-button">
-        <GeneralText>Logout</GeneralText>
+      <button
+        type="submit"
+        data-testid="logout-button"
+        className="rounded-full border border-white/40 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/10 cursor-pointer"
+      >
+        Logout
       </button>
     </form>
   ) : (
-    <GeneralText>La cartera de tus sueños</GeneralText>
+    <GeneralText className="text-white/80">La cartera de tus sueños</GeneralText>
   );
 }

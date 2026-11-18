@@ -45,7 +45,7 @@ export default function TableMovements({
 
       {/* Desktop and up: table */}
       <table data-testid="movements-table" className="hidden md:table w-full text-sm text-left rtl:text-right text-gray-600">
-        <thead className="text-sm text-gray-600 bg-primary border-b border-gray-200">
+        <thead className="text-xs uppercase tracking-wide text-primary bg-surface-strong border-b border-gray-200">
           <tr>
             <th scope="col" className="px-6 py-3 font-medium">
               <GeneralText>Descripción</GeneralText>
@@ -69,7 +69,7 @@ export default function TableMovements({
             <tr
               key={movement.id}
               data-testid="movement-row"
-              className="bg-white border-b border-gray-200 last:border-0"
+              className="bg-white border-b border-gray-200 last:border-0 transition-colors hover:bg-surface"
             >
               <th
                 scope="row"

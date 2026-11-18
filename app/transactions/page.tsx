@@ -31,20 +31,21 @@ export default function Transactions() {
   }
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center">
-      <Title size="lg">Enviar Transacción</Title>
+    <div className="flex flex-1 flex-col items-center justify-center px-4">
+      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
+      <Title size="sm" className="mb-6 text-center text-primary">Enviar Transacción</Title>
       <form
         data-testid="transaction-form"
-        className="w-full max-w-md"
+        className="w-full"
         onSubmit={(e) => {
           e.preventDefault();
           setShowConfirmModal(true);
         }}
       >
         <CustomInput type="number" name="Cantidad" required testId="transaction-amount-input" onChange={(e) => setQuantity(Number(e.target.value))} />
-        <div className="h-2" />
+        <div className="h-3" />
         <CustomInput type="text" name="Motivo" required testId="transaction-reason-input" onChange={(e) => setReason(e.target.value)} />
-        <div className="h-2" />
+        <div className="h-3" />
         <ContactSelect
           testId="contact-select"
           contacts={contacts}
@@ -56,7 +57,7 @@ export default function Transactions() {
         <CustomButton
           type="submit"
           disabled={isPending}
-          className="w-full"
+          className="w-full mt-5"
           testId="transaction-submit-button"
           message={isPending ? "Cargando…" : "Enviar"}
         />
@@ -80,6 +81,7 @@ export default function Transactions() {
         reason={reason}
         contact={contact}
       />
+      </div>
     </div>
   );
 }

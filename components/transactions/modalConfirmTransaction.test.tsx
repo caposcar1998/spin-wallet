@@ -24,9 +24,12 @@ describe("ModalConfirmTransaction", () => {
   it("shows the transaction summary", () => {
     render(<ModalConfirmTransaction {...baseProps} />);
     const modal = screen.getByTestId("confirm-transaction-modal");
-    expect(modal).toHaveTextContent("Cantidad: 50");
-    expect(modal).toHaveTextContent("Razón: Pago GTA6");
-    expect(modal).toHaveTextContent("Contacto: hector");
+    expect(modal).toHaveTextContent("Cantidad");
+    expect(modal).toHaveTextContent("$50");
+    expect(modal).toHaveTextContent("Razón");
+    expect(modal).toHaveTextContent("Pago GTA6");
+    expect(modal).toHaveTextContent("Contacto");
+    expect(modal).toHaveTextContent("hector");
   });
 
   it("submits the hidden values through the form action", async () => {

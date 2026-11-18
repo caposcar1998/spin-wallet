@@ -7,7 +7,7 @@ export function DetailTable({ rows, className }: DetailTableProps) {
   return (
     <div
       data-testid="detail-table"
-      className={`bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden ${className ?? ""}`}
+      className={`bg-white shadow-md rounded-xl border border-gray-200 overflow-hidden ${className ?? ""}`}
     >
       <table className="w-full text-sm text-left text-gray-600">
         <tbody>

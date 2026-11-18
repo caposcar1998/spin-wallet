@@ -28,9 +28,21 @@ export function ModalConfirmTransaction({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div data-testid="confirm-transaction-modal" className="relative w-full max-w-md rounded-xl p-6 bg-white">
         <CloseButton onClick={onClose} />
-        <p>Cantidad: {quantity}</p>
-        <p>Razón: {reason}</p>
-        <p>Contacto: {contact}</p>
+        <p className="mb-4 text-lg font-semibold text-gray-900">Confirmar transacción</p>
+        <dl className="flex flex-col gap-2 text-sm text-gray-700">
+          <div className="flex justify-between">
+            <dt className="font-medium text-gray-500">Cantidad</dt>
+            <dd className="font-semibold text-gray-900">${quantity}</dd>
+          </div>
+          <div className="flex justify-between">
+            <dt className="font-medium text-gray-500">Razón</dt>
+            <dd className="font-semibold text-gray-900">{reason}</dd>
+          </div>
+          <div className="flex justify-between">
+            <dt className="font-medium text-gray-500">Contacto</dt>
+            <dd className="font-semibold text-gray-900">{contact}</dd>
+          </div>
+        </dl>
         <form action={formAction} className="mt-4">
           <input type="hidden" name="Cantidad" value={quantity} />
           <input type="hidden" name="Motivo" value={reason} />

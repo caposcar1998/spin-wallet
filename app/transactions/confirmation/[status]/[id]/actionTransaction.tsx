@@ -24,7 +24,7 @@ export function ActionTransaction({
 
   return (
     <div>
-        {status === "408" && (
+        {["408", "500"].includes(status) && (
     <form action={formAction} className="flex flex-col items-center gap-2">
       <input type="hidden" name="Cantidad" value={cantidad} />
       <input type="hidden" name="Motivo" value={motivo} />

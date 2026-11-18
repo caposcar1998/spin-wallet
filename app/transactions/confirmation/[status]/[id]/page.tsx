@@ -29,8 +29,10 @@ export default async function Confirmation({
             : error;
 
   return (
-    <div data-testid="confirmation-screen" className="flex flex-col gap-4 items-center justify-center">
-      <Title testId="confirmation-title">Transacción {status !== "201" ? "fallida" : "exitosa"}</Title>
+    <div data-testid="confirmation-screen" className="flex flex-1 flex-col gap-4 items-center justify-center px-4">
+      <Title testId="confirmation-title" className={status !== "201" ? "text-red-600" : "text-primary"}>
+        Transacción {status !== "201" ? "fallida" : "exitosa"}
+      </Title>
       <DetailTable
         className="w-full max-w-md"
         rows={[

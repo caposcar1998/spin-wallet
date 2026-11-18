@@ -18,16 +18,14 @@ export default function Login() {
   }
 
   return (
-    <>
-    <div className="flex flex-1 flex-col items-center justify-center">
-    <Title size="lg">Login</Title>
-    </div>
-    <div className="flex flex-1 flex-col items-center">
+    <div className="flex flex-1 flex-col items-center justify-center px-4">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-xl">
+        <Title size="sm" className="mb-6 text-center text-primary">Login</Title>
       <form action={formAction} data-testid="login-form">
         <CustomInput type="text" name="user" required testId="login-user-input" />
-        <div className="h-2" />
+        <div className="h-3" />
         <CustomInput type="password" name="password" required testId="login-password-input" />
-        <div className="h-2" />
+        <div className="h-5" />
         <CustomButton
           type="submit"
           disabled={isPending}
@@ -41,7 +39,7 @@ export default function Login() {
           </Alert>
         )}
       </form>
+      </div>
     </div>
-    </>
   );
 }

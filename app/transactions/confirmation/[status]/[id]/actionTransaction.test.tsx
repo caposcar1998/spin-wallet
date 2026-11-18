@@ -20,12 +20,15 @@ const baseProps = {
 };
 
 describe("ActionTransaction", () => {
-  it("shows the retry button only on timeout (408)", () => {
-    render(<ActionTransaction {...baseProps} status="408" />);
-    expect(screen.getByTestId("retry-button")).toBeInTheDocument();
-  });
+  it.each(["408", "500"])(
+    "shows the retry button on network error %s",
+    (status) => {
+      render(<ActionTransaction {...baseProps} status={status} />);
+      expect(screen.getByTestId("retry-button")).toBeInTheDocument();
+    },
+  );
 
-  it.each(["201", "400", "500", "520"])(
+  it.each(["201", "400", "520"])(
     "hides retry on status %s",
     (status) => {
       render(<ActionTransaction {...baseProps} status={status} />);

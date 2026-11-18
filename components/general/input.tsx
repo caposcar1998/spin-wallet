@@ -9,7 +9,7 @@ interface CustomInputProps {
 export function CustomInput({ type, name, required, testId, onChange }: CustomInputProps) {
   return (
     <>
-     <label htmlFor={name} className="block mb-2.5 text-sm font-medium text-heading">{name}</label>
+     <label htmlFor={name} className="block mb-2 text-sm font-medium text-gray-800 capitalize">{name}</label>
     <input
       id={name}
       type={type}
@@ -17,7 +17,7 @@ export function CustomInput({ type, name, required, testId, onChange }: CustomIn
       required={required}
       onChange={onChange}
       data-testid={testId}
-      className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-secondary focus:border-secondary focus:outline-none block w-full px-3 py-2.5 shadow-xs placeholder:text-gray-400"
+      className="bg-white border border-gray-300 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-primary focus:border-primary focus:outline-none block w-full px-3.5 py-2.5 shadow-sm transition-shadow placeholder:text-gray-400"
     />
     </>
   );

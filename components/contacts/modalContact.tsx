@@ -4,6 +4,7 @@ import { FormEvent } from "react";
 import { CustomButton } from "../general/button";
 import { CustomInput } from "../general/input";
 import { CloseButton } from "../general/closeButton";
+import { Title } from "../general/title";
 
 export function ModalContact({
   isOpen,
@@ -32,6 +33,7 @@ export function ModalContact({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div data-testid="contact-modal" className="relative w-full max-w-md rounded-xl p-6 bg-white">
         <CloseButton onClick={onClose} />
+        <Title size="lg" className="text-primary pb-4">Agregar contacto</Title>
         <form onSubmit={handleSubmit}>
           <CustomInput type="text" name="Nombre contacto" required testId="contact-name-input" />
           <div className="h-2" />
