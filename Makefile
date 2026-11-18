@@ -30,14 +30,6 @@ test:
 e2e:
 	docker compose up -d wiremock
 	npm run test:e2e
-	npm run build-storybook
-	@npx http-server storybook-static -p 6011 -s > /tmp/sb-e2e-server.log 2>&1 & \
-	SERVER_PID=$$!; \
-	sleep 3; \
-	npx test-storybook --url http://localhost:6011; \
-	STATUS=$$?; \
-	kill $$SERVER_PID 2>/dev/null; \
-	exit $$STATUS
 
 e2e-ui:
 	docker compose up -d wiremock

@@ -18,7 +18,7 @@ Funcionalidades principales:
 - Resumen de confirmación antes de enviar.
 - Comprobante con manejo de escenarios aleatorios: éxito, fondos insuficientes, error de red, timeout y error desconocido, con opción de reintento.
 - Reglas de negocio en el servidor: monto > 0, saldo suficiente y destinatario obligatorio.
-- Testing en tres capas: unitario (Vitest + Testing Library), E2E del flujo completo (Playwright) e interacciones sobre stories (Storybook test-runner).
+- Testing en dos capas: unitario (Vitest + Testing Library) y E2E del flujo completo (Playwright, headed con `slowMo` para demo visible).
 
 ## 2. Diseño de arquitectura (flujo en terminal)
 
@@ -168,8 +168,6 @@ types/types.tsx                   # AlertProps, errors, User, Movement, SavedCon
 wiremock/mappings/                # Stubs: user, users, saved-contacts, movement-create
 proxy.ts                          # Guard de rutas por cookie
 tests/                            # Playwright E2E (wallet-flow, example)
-.storybook/                       # Config + mocks (flow, actions, session, users)
-**/*.stories.tsx                  # Stories de componentes y pantallas
 **/*.test.ts(x)                   # Suites Vitest colocalizadas
 vitest.config.ts / vitest.setup.ts
 playwright.config.ts              # webServer: API_CHAOS=false npm run dev
@@ -216,14 +214,13 @@ npm run build && npm start
 
 ```bash
 make test        # Vitest — 44 tests: acciones, validaciones y componentes críticos
-make e2e         # Playwright headed + build/test de Storybook (flujo completo)
+make e2e         # Playwright headed — recorre el flujo completo en el navegador
 make e2e-ui      # Playwright UI mode (watch, time-travel, re-run)
 make e2e-debug   # Playwright Inspector — pausa antes de cada acción
 ```
 
 - `npm run test` / `npm run test:watch` — Vitest 4 + jsdom + Testing Library. Suites colocalizadas (`*.test.ts(x)`): server actions (`loginUser`, `sendTransaction`), modales, tabla de movimientos, retry del comprobante.
 - `npm run test:e2e` — Playwright (chromium headed + `--slow-mo`). `playwright.config.ts` levanta `npm run dev` con `API_CHAOS=false` vía `webServer`; `tests/wallet-flow.spec.ts` recorre Login → Home → Transacción → Comprobante con `test.step`.
-- `npm run storybook` / `build-storybook` / `test-storybook` — Storybook 10 con `@storybook/nextjs`; las server actions se mockean por webpack (`NormalModuleReplacementPlugin` → `.storybook/mocks/`); el test-runner ejecuta las `play` functions headless. Requiere `npx playwright install chromium` la primera vez.
 - `npm run lint` — ESLint 9 + eslint-config-next
 - `npx tsc --noEmit` — type checking
 - `npm run format` — Prettier
@@ -269,7 +266,7 @@ make e2e-debug   # Playwright Inspector — pausa antes de cada acción
 
 ### Calidad
 - El retry del comprobante solo aparece en `408`; el spec espera reintento también en error de red (`500`) y desconocido (`520`).
-- El E2E cubre el happy path; los escenarios de error del comprobante solo se ejercen en Storybook/tests unitarios.
+- El E2E cubre el happy path; los escenarios de error del comprobante solo se ejercen en tests unitarios (pendiente: specs de retry/500/timeout).
 
 ## 8. Limitaciones conocidas
 

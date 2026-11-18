@@ -18,12 +18,12 @@ Checklist contra `ai/challenge.md`. Marcar con `x` lo resuelto.
 ## Docs desactualizadas
 
 - [x] **`README.md` §7 "Calidad"** — afirma cosas ya resueltas, borrar:
-  - "Sin tests: ni runner ni suites" → existen 44 unit tests + e2e + storybook.
+  - "Sin tests: ni runner ni suites" → existen 49 unit tests + e2e con Playwright.
   - "`body: any` en `apiPost`" → ya es `Record<string, unknown>`.
   - "`apiPost` sin `try/catch` en el caller" → ya cubierto (redirect a `520`).
   - "`label htmlFor='first_name'`" → ya es `htmlFor={name}` + `id={name}`.
 - [x] **`README.md` §7 "Next.js"** — el bullet `"use server" mal aplicado` ya está resuelto; borrar.
-- [x] **`README.md`** — documentar los comandos de tests nuevos: `make test`, `make e2e`, `make e2e-ui`, `make e2e-debug`, `npm run storybook`, `npm run test-storybook`, `API_CHAOS=false` para runs deterministas.
+- [x] **`README.md`** — documentar los comandos de tests nuevos: `make test`, `make e2e`, `make e2e-ui`, `make e2e-debug`, `API_CHAOS=false` para runs deterministas.
 
 ## Riesgos conocidos (evaluar si documentar o arreglar)
 
@@ -36,6 +36,5 @@ Checklist contra `ai/challenge.md`. Marcar con `x` lo resuelto.
 
 - [x] `npm run build` pasa.
 - [x] `npx tsc --noEmit` y `npm run lint` limpios.
-- [x] `make test` (44 tests) y `make e2e` (playwright + storybook) verdes.
+- [x] `make test` (49 tests) y `make e2e` (playwright) verdes.
 - [x] `git status` sin archivos sueltos (`ai/challenge.md` está untracked — decidir si entra al repo o a `.gitignore`).
-- [x] `.storybook/` + `stories/` — confirmar que el material de Storybook que se va a entregar compile (`npm run build-storybook`).
