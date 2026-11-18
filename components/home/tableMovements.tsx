@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CustomButton } from "../general/button";
-import { Movement } from "@/app/home/actions";
+import { Movement } from "@/types/types";
 import { GeneralText } from "../general/generalText";
 
 export default function TableMovements({
@@ -10,7 +10,7 @@ export default function TableMovements({
 }) {
   if (movements.length === 0) {
     return (
-      <p className="px-6 py-8 text-center text-sm text-gray-600">
+      <p data-testid="movements-empty" className="px-6 py-8 text-center text-sm text-gray-600">
         No hay movimientos
       </p>
     );
@@ -19,9 +19,9 @@ export default function TableMovements({
   return (
     <>
       {/* Mobile: stacked cards */}
-      <ul className="md:hidden divide-y divide-gray-200">
+      <ul data-testid="movements-list" className="md:hidden divide-y divide-gray-200">
         {movements.map((movement) => (
-          <li key={movement.id} className="p-4">
+          <li key={movement.id} data-testid="movement-item" className="p-4">
             <h3 className="font-medium text-gray-900">{movement.description}</h3>
             <div className="mt-2 flex flex-col gap-1 text-sm text-gray-600">
               <p>
@@ -30,10 +30,13 @@ export default function TableMovements({
               <p>
                 <span className="font-medium">Fecha:</span> {movement.date}
               </p>
+              <p>
+                <span className="font-medium">Estado:</span> {movement.status}
+              </p>
             </div>
             <div className="mt-3">
               <Link href={`/transactions/${movement.id}`}>
-                <CustomButton message="Ver" />
+                <CustomButton testId="movement-view-button" message="Ver" />
               </Link>
             </div>
           </li>
@@ -41,7 +44,7 @@ export default function TableMovements({
       </ul>
 
       {/* Desktop and up: table */}
-      <table className="hidden md:table w-full text-sm text-left rtl:text-right text-gray-600">
+      <table data-testid="movements-table" className="hidden md:table w-full text-sm text-left rtl:text-right text-gray-600">
         <thead className="text-sm text-gray-600 bg-primary border-b border-gray-200">
           <tr>
             <th scope="col" className="px-6 py-3 font-medium">
@@ -54,6 +57,9 @@ export default function TableMovements({
               <GeneralText>Fecha</GeneralText>
             </th>
             <th scope="col" className="px-6 py-3 font-medium">
+              <GeneralText>Estado</GeneralText>
+            </th>
+            <th scope="col" className="px-6 py-3 font-medium">
               <GeneralText>Revisar</GeneralText>
             </th>
           </tr>
@@ -62,6 +68,7 @@ export default function TableMovements({
           {movements.map((movement) => (
             <tr
               key={movement.id}
+              data-testid="movement-row"
               className="bg-white border-b border-gray-200 last:border-0"
             >
               <th
@@ -77,8 +84,11 @@ export default function TableMovements({
                 <GeneralText>{movement.date}</GeneralText>
               </td>
               <td className="px-6 py-4">
+                <GeneralText>{movement.status === "completed" ? "✅" : "❌"}</GeneralText>
+              </td>
+              <td className="px-6 py-4">
                 <Link href={`/transactions/${movement.id}`}>
-                  <CustomButton message="Ver" />
+                  <CustomButton testId="movement-view-button" message="Ver" />
                 </Link>
               </td>
             </tr>

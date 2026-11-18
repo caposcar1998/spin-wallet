@@ -1,7 +1,5 @@
-"use server";
-
 import { getSession } from "@/lib/session";
-import { getUser } from "@/app/home/actions";
+import { getUser } from "@/lib/users";
 import { Title } from "@/components/general/title";
 
 export default async function UserData() {
@@ -9,8 +7,8 @@ export default async function UserData() {
   const user = session ? await getUser(session) : null;
   return (
     <div>
-      <Title>Bienvenido {user?.name}</Title>
-      <Title size="sm">Tu saldo disponible es de ${user?.balance}</Title>
+      <Title testId="user-name">Bienvenido {user?.name}</Title>
+      <Title testId="user-balance" size="sm">Tu saldo disponible es de ${user?.balance}</Title>
     </div>
   );
 }

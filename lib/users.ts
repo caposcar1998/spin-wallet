@@ -1,21 +1,7 @@
 import { apiGet } from "@/lib/api";
+import { getCreatedMovements } from "@/lib/movements";
 import { cacheLife, cacheTag } from "next/cache";
-
-export interface Movement {
-  id: number;
-  description: string;
-  amount: number;
-  date: string;
-  extra: string;
-}
-
-export interface User {
-  id: number;
-  name: string;
-  email: string;
-  balance: number;
-  movements: Movement[];
-}
+import type { User } from "@/types/types";
 
 export async function getUsers(): Promise<User[]> {
   const response = await apiGet("/users");
@@ -29,5 +15,14 @@ export async function getUser(id: string): Promise<User> {
   cacheTag("user");
   const response = await apiGet(`/user/${id}`);
   const body = await response.json();
-  return body.data;
+  const created = getCreatedMovements(id);
+  return {
+    ...body.data,
+    balance:
+      body.data.balance -
+      created
+        .filter((m) => m.status === "completed")
+        .reduce((sum, m) => sum + m.amount, 0),
+    movements: [...created, ...body.data.movements],
+  };
 }

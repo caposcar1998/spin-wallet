@@ -21,28 +21,32 @@
             "description": "Envio a oscar",
             "amount": 100,
             "date": "2026-02-01",
-            "extra": "Pago GTA6"
+            "extra": "Pago GTA6",
+            "status": "completed"
           },
           {
             "id": 2,
             "description": "Envio a Hector",
             "amount": 150,
             "date": "2026-02-01",
-            "extra": "Pago Zelda ocarina of time"
+            "extra": "Pago Zelda ocarina of time",
+            "status": "completed"
           },
           {
             "id": 3,
             "description": "Envio a Salmay",
             "amount": 200,
             "date": "2026-02-01",
-            "extra": "Pago Mario Kart"
+            "extra": "Pago Mario Kart",
+            "status": "completed"
           },
           {
             "id": 4,
             "description": "Envio a Fernanda",
             "amount": 250,
             "date": "2026-02-02",
-            "extra": "Pago Hollow Knight"
+            "extra": "Pago Hollow Knight",
+            "status": "failed"
           }
         ]
       }

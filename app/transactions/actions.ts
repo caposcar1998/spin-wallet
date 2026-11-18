@@ -1,9 +1,12 @@
 "use server";
 
 import { apiGet, apiPost } from "@/lib/api";
+import { addMovement } from "@/lib/movements";
+import { getUser } from "@/lib/users";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { updateTag } from "next/cache";
+import type { SavedContact } from "@/types/types";
 
 export async function sendTransaction(
   prevState: undefined | { error: string },
@@ -24,25 +27,42 @@ export async function sendTransaction(
     return { error: "El motivo es requerido" };
   }
 
-  const response = await apiPost(`/user/${session}/movements`, {
-    cantidad: amount,
-    motivo: String(motivo).trim(),
-    contacto,
-  });
+  if (!contacto || !String(contacto).trim()) {
+    return { error: "El contacto es requerido" };
+  }
 
-  updateTag("user");
+  const user = await getUser(session);
+  if (amount > user.balance) {
+    return { error: `Fondos insuficientes, te faltan ${amount - user.balance} pesos` };
+  }
+
   const params = new URLSearchParams({
     cantidad: String(amount),
     motivo: String(motivo).trim(),
     contacto: String(contacto ?? ""),
   });
-  redirect(`/transactions/confirmation/${response.status}/123456?${params}`);
-}
 
-export interface SavedContact {
-  id: number;
-  name: string;
-  email: string;
+  let response: Response;
+  try {
+    response = await apiPost(`/user/${session}/movements`, {
+      cantidad: amount,
+      motivo: String(motivo).trim(),
+      contacto,
+    });
+  } catch {
+    redirect(`/transactions/confirmation/520/123456?${params}`);
+  }
+
+  addMovement(session, {
+    id: Date.now(),
+    description: `Envio a ${String(contacto).trim()}`,
+    amount,
+    date: new Date().toISOString().slice(0, 10),
+    extra: String(motivo).trim(),
+    status: response.ok ? "completed" : "failed",
+  });
+  updateTag("user");
+  redirect(`/transactions/confirmation/${response.status}/123456?${params}`);
 }
 
 export async function getSavedContacts(): Promise<SavedContact[]> {

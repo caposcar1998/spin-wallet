@@ -1,10 +1,8 @@
-"use server";
-
 import Link from "next/link";
 import { CustomButton } from "../general/button";
 import TableMovements from "./tableMovements";
 import { getSession } from "@/lib/session";
-import { getUser } from "@/app/home/actions";
+import { getUser } from "@/lib/users";
 import { Title } from "@/components/general/title";
 
 export default async function Movements() {
@@ -20,7 +18,7 @@ export default async function Movements() {
       </div>
       <div className="flex justify-center mt-15">
         <Link href="/transactions">
-          <CustomButton message="Nueva transacción" />
+          <CustomButton testId="new-transaction-button" message="Nueva transacción" />
         </Link>
       </div>
     </div>

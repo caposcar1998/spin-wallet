@@ -1,11 +1,11 @@
 const API_BASE_URL = process.env.USERS_API_BASE_URL ?? "http://localhost:8080";
-const random = 13;
 export async function apiGet(path: string) {
-  return fetch(`${API_BASE_URL}${path}?random=${random}`, { cache: "no-store" });
+  return fetch(`${API_BASE_URL}${path}`, { cache: "no-store" });
 }
 
-export async function apiPost(path: string, body: any) {
-  if (random < 5) {
+export async function apiPost(path: string, body: Record<string, unknown>) {
+  const random = Math.floor(Math.random() * 20);
+  if (process.env.API_CHAOS === "false" || random < 5) {
       return fetch(`${API_BASE_URL}${path}`, {
     method: "POST",
     headers: {

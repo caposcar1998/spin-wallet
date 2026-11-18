@@ -7,7 +7,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "test-storybook": "test-storybook",
+    "test:e2e": "playwright test --project=chromium --headed --slow-mo 800",
+    "test:e2e:ui": "playwright test --project=chromium --ui",
+    "test:e2e:debug": "playwright test --project=chromium --headed --debug"
   },
   "dependencies": {
     "next": "16.4.6",
@@ -15,14 +23,25 @@
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "@storybook/nextjs": "^10.6.7",
+    "@storybook/test-runner": "^0.26.1",
+    "@tailwindcss/postcss": "^4.3.5",
     "@tailwindcss/turbopack": "4.3.3",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.12",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.3.0",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "jsdom": "^29.1.1",
+    "prettier": "^3.6.2",
+    "storybook": "^10.6.7",
     "tailwindcss": "4.3.3",
     "typescript": "^5",
-    "prettier": "^3.6.2"
+    "vitest": "^4.1.12"
   }
 }

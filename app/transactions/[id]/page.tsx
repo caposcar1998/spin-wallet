@@ -1,7 +1,9 @@
 import { getSession } from "@/lib/session";
-import { getUser } from "@/app/home/actions";
+import { getUser } from "@/lib/users";
 import { Title } from "@/components/general/title";
-import { GeneralText } from "@/components/general/generalText";
+import { DetailTable } from "@/components/general/detailTable";
+
+export const instant = false;
 
 export default async function Transaction({
   params,
@@ -24,30 +26,15 @@ export default async function Transaction({
   return (
     <div className="flex flex-col gap-4 items-center justify-center">
       <Title>{movement.description}</Title>
-      <div className="w-full max-w-md bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
-        <table className="w-full text-sm text-left text-gray-600">
-          <tbody>
-            <tr className="border-b border-gray-200">
-              <th scope="row" className="px-6 py-4">
-                <GeneralText>Monto</GeneralText>
-              </th>
-              <td className="px-6 py-4"><GeneralText>${movement.amount}</GeneralText></td>
-            </tr>
-            <tr className="border-b border-gray-200">
-              <th scope="row" className="px-6 py-4">
-                <GeneralText>Fecha</GeneralText>
-              </th>
-              <td className="px-6 py-4"><GeneralText>{movement.date}</GeneralText></td>
-            </tr>
-            <tr>
-              <th scope="row" className="px-6 py-4">
-                <GeneralText>Descripción</GeneralText>
-              </th>
-              <td className="px-6 py-4"><GeneralText>{movement.extra}</GeneralText></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <DetailTable
+        className="w-full max-w-md"
+        rows={[
+          { label: "Monto", value: `$${movement.amount}` },
+          { label: "Fecha", value: movement.date },
+          { label: "Estado", value: movement.status },
+          { label: "Descripción", value: movement.extra },
+        ]}
+      />
     </div>
   );
 }

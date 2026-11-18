@@ -6,7 +6,7 @@ import { CloseButton } from "../general/closeButton";
 export function ModalConfirmTransaction({
   isOpen,
   onClose,
-  onConfirm,
+  formAction,
   isPending,
   quantity,
   reason,
@@ -14,7 +14,7 @@ export function ModalConfirmTransaction({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  formAction: (formData: FormData) => void;
   isPending: boolean;
   quantity: number;
   reason: string;
@@ -26,20 +26,24 @@ export function ModalConfirmTransaction({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="relative w-full max-w-md rounded-xl p-6 bg-white">
+      <div data-testid="confirm-transaction-modal" className="relative w-full max-w-md rounded-xl p-6 bg-white">
         <CloseButton onClick={onClose} />
         <p>Cantidad: {quantity}</p>
         <p>Razón: {reason}</p>
         <p>Contacto: {contact}</p>
-        <div className="mt-4">
+        <form action={formAction} className="mt-4">
+          <input type="hidden" name="Cantidad" value={quantity} />
+          <input type="hidden" name="Motivo" value={reason} />
+          <input type="hidden" name="Contacto" value={contact} />
+          <input type="hidden" name="Fecha" value={new Date().toISOString()} />
           <CustomButton
-            type="button"
+            type="submit"
             disabled={isPending}
             className="w-full"
+            testId="confirm-transaction-button"
             message={isPending ? "Enviando…" : "Confirmar"}
-            onClick={onConfirm}
           />
-        </div>
+        </form>
       </div>
     </div>
   );

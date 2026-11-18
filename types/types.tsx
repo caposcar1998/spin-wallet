@@ -13,3 +13,26 @@ export interface AlertProps {
   onClose?: () => void;
   children?: React.ReactNode;
 }
+
+export interface Movement {
+  id: number;
+  description: string;
+  amount: number;
+  date: string;
+  extra: string;
+  status: string;
+}
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  balance: number;
+  movements: Movement[];
+}
+
+export interface SavedContact {
+  id: number;
+  name: string;
+  email: string;
+}

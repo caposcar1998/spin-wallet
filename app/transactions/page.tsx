@@ -2,12 +2,14 @@
 
 import { Title } from "@/components/general/title";
 import { Alert } from "@/components/alert";
-import { useActionState, useEffect, useState, startTransition } from "react";
+import { useActionState, useState } from "react";
 import { CustomButton } from "@/components/general/button";
 import { CustomInput } from "@/components/general/input";
-import { sendTransaction, getSavedContacts, type SavedContact } from "./actions";
+import { sendTransaction } from "./actions";
 import { ModalContact } from "@/components/contacts/modalContact";
 import { ModalConfirmTransaction } from "@/components/transactions/modalConfirmTransaction";
+import { ContactSelect } from "@/components/transactions/contactSelect";
+import { useContacts } from "@/components/transactions/useContacts";
 
 export default function Transactions() {
   const [state, formAction, isPending] = useActionState(
@@ -15,75 +17,47 @@ export default function Transactions() {
     undefined,
   );
   const [closeAlert, setCloseAlert] = useState(false);
-  const [contacts, setContacts] = useState<SavedContact[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [quantity, setQuantity] = useState(0);
   const [reason, setReason] = useState("");
-  const [contact, setContact] = useState("");
+  const { contacts, contact, contactId, setContactId, addContact } = useContacts();
 
-  useEffect(() => {
-    getSavedContacts()
-      .then(setContacts)
-      .catch(() => setContacts([]));
-  }, []);
-
-  useEffect(() => {
+  const [prevActionState, setPrevActionState] = useState(state);
+  if (state !== prevActionState) {
+    setPrevActionState(state);
     setCloseAlert(false);
-  }, [state]);
-
-  const confirmTransaction = () => {
-    const formData = new FormData();
-    formData.set("Cantidad", String(quantity));
-    formData.set("Motivo", reason);
-    formData.set("Contacto", contact);
-    formData.set("Fecha", new Date().toISOString());
-    startTransition(() => {
-      formAction(formData);
-    });
-  };
+    if (state?.error) setShowConfirmModal(false);
+  }
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center">
       <Title size="lg">Enviar Transacción</Title>
       <form
+        data-testid="transaction-form"
         className="w-full max-w-md"
         onSubmit={(e) => {
           e.preventDefault();
           setShowConfirmModal(true);
         }}
       >
-        <CustomInput type="number" name="Cantidad" required onChange={(e) => setQuantity(Number(e.target.value))} />
+        <CustomInput type="number" name="Cantidad" required testId="transaction-amount-input" onChange={(e) => setQuantity(Number(e.target.value))} />
         <div className="h-2" />
-        <CustomInput type="text" name="Motivo" required onChange={(e) => setReason(e.target.value)} />
+        <CustomInput type="text" name="Motivo" required testId="transaction-reason-input" onChange={(e) => setReason(e.target.value)} />
         <div className="h-2" />
-        <select
-        required
-          name="Contacto"
-          className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-secondary focus:border-secondary focus:outline-none block w-full px-3 py-2.5 shadow-xs"
-          onChange={(e) => {
-            if (e.target.value === "new") {
-              e.target.value = "";
-              setShowModal(true);
-              return;
-            }
-            setContact(
-              contacts.find((c) => String(c.id) === e.target.value)?.name ?? "",
-            );
-          }}
-        >
-          <option value="">Selecciona un contacto</option>
-          {contacts.map((contact) => (
-            <option key={contact.id} value={contact.id}>
-              {contact.name}
-            </option>
-          ))}
-          <option value="new">Nuevo contacto</option>
-        </select>
+        <ContactSelect
+          testId="contact-select"
+          contacts={contacts}
+          value={contactId}
+          onChange={(id) =>
+            id === "new" ? setShowModal(true) : setContactId(id)
+          }
+        />
         <CustomButton
           type="submit"
           disabled={isPending}
           className="w-full"
+          testId="transaction-submit-button"
           message={isPending ? "Cargando…" : "Enviar"}
         />
         {state?.error && !closeAlert && (
@@ -92,11 +66,15 @@ export default function Transactions() {
           </Alert>
         )}
       </form>
-      <ModalContact isOpen={showModal} onClose={() => setShowModal(false)} />
+      <ModalContact
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onSave={addContact}
+      />
       <ModalConfirmTransaction
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
-        onConfirm={confirmTransaction}
+        formAction={formAction}
         isPending={isPending}
         quantity={quantity}
         reason={reason}

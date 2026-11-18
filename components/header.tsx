@@ -25,7 +25,7 @@ async function HeaderSession() {
 
   return session ? (
     <form action={logout}>
-      <button type="submit">
+      <button type="submit" data-testid="logout-button">
         <GeneralText>Logout</GeneralText>
       </button>
     </form>

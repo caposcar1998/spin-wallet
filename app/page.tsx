@@ -7,7 +7,7 @@ export default function Main() {
       <main className="flex-1 flex flex-col items-center justify-center">
         <h2 className="text-2xl font-bold">Bienvenido a Spin wallet</h2>
         <Link href="/login">
-          <CustomButton message="Ir a login" />
+          <CustomButton testId="go-login-button" message="Ir a login" />
         </Link>
       </main>
     </>
