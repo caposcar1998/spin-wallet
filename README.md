@@ -18,6 +18,7 @@ Funcionalidades principales:
 - Resumen de confirmación antes de enviar.
 - Comprobante con manejo de escenarios aleatorios: éxito, fondos insuficientes, error de red, timeout y error desconocido, con opción de reintento.
 - Reglas de negocio en el servidor: monto > 0, saldo suficiente y destinatario obligatorio.
+- Testing en tres capas: unitario (Vitest + Testing Library), E2E del flujo completo (Playwright) e interacciones sobre stories (Storybook test-runner).
 
 ## 2. Diseño de arquitectura (flujo en terminal)
 
@@ -104,14 +105,14 @@ Browser → proxy.ts (guard por cookie) → Layout (Header/Footer)
 - **Rutas dinámicas**: `[id]` en detalle; `[status]` + `[id]` anidados en confirmación.
 - **Datos del comprobante por query string**: `?cantidad=&motivo=&contacto=` leídos vía `searchParams` (decisión pragmática: WireMock es stateless y no permite refetch por id).
 - **Navegación**: `Link` en tabla de movimientos y landing; `router.push`/`router.back()` en botones client; `redirect()` dentro de Server Actions.
-- **`app/loading.tsx`** y **`app/not-found.tsx`** presentes; no hay `error.tsx` por ruta.
+- **`app/loading.tsx`**, **`app/not-found.tsx`** y **`app/home/error.tsx`** presentes; el resto de rutas no tiene `error.tsx` propio.
 
 ### 2.3 Flujo de consumo de APIs y datos
 
 Todo el acceso a datos pasa por `lib/api.ts` (único boundary HTTP, server-side):
 
 - `apiGet(path)` → `fetch` con `cache: "no-store"` (la cache la gestiona `"use cache"` a nivel función).
-- `apiPost(path, body)` → POST real a WireMock **o** respuesta fabricada según un random por request: 25% éxito, 15% `500`, 20% `400`, 20% `408` (con delay de 5s), 20% `520`. Es el motor de los escenarios aleatorios del comprobante.
+- `apiPost(path, body)` → POST real a WireMock **o** respuesta fabricada según un random por request: 25% éxito, 15% `500`, 20% `400`, 20% `408` (con delay de 5s), 20% `520`. Es el motor de los escenarios aleatorios del comprobante. El kill-switch `API_CHAOS=false` lo desactiva (lo usan los tests E2E para un happy path determinista).
 
 **Server Actions** (`"use server"`):
 
@@ -142,7 +143,8 @@ app/
 │   ├── page.tsx                  # Formulario (client) + useActionState
 │   └── actions.ts                # loginUser (server action)
 ├── home/
-│   └── page.tsx                  # Suspense: UserData + Movements (server)
+│   ├── page.tsx                  # Suspense: UserData + Movements (server)
+│   └── error.tsx                 # Error boundary del segmento (client)
 ├── transactions/
 │   ├── page.tsx                  # Formulario de envío (client)
 │   ├── actions.ts                # sendTransaction / getSavedContacts
@@ -165,6 +167,12 @@ lib/
 types/types.tsx                   # AlertProps, errors, User, Movement, SavedContact
 wiremock/mappings/                # Stubs: user, users, saved-contacts, movement-create
 proxy.ts                          # Guard de rutas por cookie
+tests/                            # Playwright E2E (wallet-flow, example)
+.storybook/                       # Config + mocks (flow, actions, session, users)
+**/*.stories.tsx                  # Stories de componentes y pantallas
+**/*.test.ts(x)                   # Suites Vitest colocalizadas
+vitest.config.ts / vitest.setup.ts
+playwright.config.ts              # webServer: API_CHAOS=false npm run dev
 Dockerfile / docker-compose.yml / Makefile
 ```
 
@@ -173,6 +181,7 @@ Dockerfile / docker-compose.yml / Makefile
 | Variable | Requerida | Default | Exposición | Descripción |
 |---|---|---|---|---|
 | `USERS_API_BASE_URL` | No | `http://localhost:8080` | Servidor | Base URL del backend (WireMock). En docker-compose del servicio `web` apunta a `http://wiremock:8080` |
+| `API_CHAOS` | No | caos activado | Servidor | `"false"` desactiva la simulación de errores de `apiPost` (todas las requests van a WireMock). Usado por Playwright vía `webServer` |
 
 No existen archivos `.env*` en el repo; el default cubre el desarrollo local. No hay variables `NEXT_PUBLIC_*` ni secretos en el código.
 
@@ -183,6 +192,8 @@ No existen archivos `.env*` en el repo; el default cubre el desarrollo local. No
 ```bash
 npm install
 ```
+
+Package manager canónico: **npm** (los scripts del Makefile llaman `npm run`). Existen también `pnpm-lock.yaml` y `yarn.lock` en el repo — candidatos a eliminar para evitar resoluciones divergentes.
 
 ### Desarrollo
 
@@ -203,10 +214,19 @@ npm run build && npm start
 
 ### Pruebas
 
+```bash
+make test        # Vitest — 44 tests: acciones, validaciones y componentes críticos
+make e2e         # Playwright headed + build/test de Storybook (flujo completo)
+make e2e-ui      # Playwright UI mode (watch, time-travel, re-run)
+make e2e-debug   # Playwright Inspector — pausa antes de cada acción
+```
+
+- `npm run test` / `npm run test:watch` — Vitest 4 + jsdom + Testing Library. Suites colocalizadas (`*.test.ts(x)`): server actions (`loginUser`, `sendTransaction`), modales, tabla de movimientos, retry del comprobante.
+- `npm run test:e2e` — Playwright (chromium headed + `--slow-mo`). `playwright.config.ts` levanta `npm run dev` con `API_CHAOS=false` vía `webServer`; `tests/wallet-flow.spec.ts` recorre Login → Home → Transacción → Comprobante con `test.step`.
+- `npm run storybook` / `build-storybook` / `test-storybook` — Storybook 10 con `@storybook/nextjs`; las server actions se mockean por webpack (`NormalModuleReplacementPlugin` → `.storybook/mocks/`); el test-runner ejecuta las `play` functions headless. Requiere `npx playwright install chromium` la primera vez.
 - `npm run lint` — ESLint 9 + eslint-config-next
 - `npx tsc --noEmit` — type checking
 - `npm run format` — Prettier
-- **Tests unitarios / E2E: no existen** (ver Áreas de mejora).
 
 ### Docker y despliegue
 
@@ -226,7 +246,7 @@ npm run build && npm start
 | Progressive enhancement | ✅ Formularios y confirmación usan `form action` nativo (funcionan sin JS) |
 | ISR / SSG | ❌ No aplica — todo el contenido es dinámico por sesión |
 | Dynamic imports / lazy loading | ❌ No identificado — bundle pequeño, no justificado |
-| Error boundaries por ruta | ⚠️ Parcial — hay `loading.tsx`/`not-found.tsx`, falta `error.tsx` |
+| Error boundaries por ruta | ⚠️ Parcial — `error.tsx` en `home` (cubre fallos de `getUser` con Reintentar via `reset()`); el resto de rutas no tiene boundary propio |
 
 ## 6. Seguridad y manejo de información
 
@@ -235,24 +255,21 @@ npm run build && npm start
 - **Validación de inputs**: formato de usuario y contraseña en `loginUser`; monto > 0, motivo, contacto y saldo en `sendTransaction` — todas server-side, no solo en la UI.
 - **Secretos**: ninguno en el código; la única variable es la base URL pública del mock.
 - **Acciones expuestas**: los módulos `"use server"` son endpoints RPC públicos; las validaciones viven ahí precisamente porque la UI es bypasseable.
-- **Riesgos conocidos (demo)**: la cookie es predecible (`userId: "1"`), los datos del comprobante viajan en la URL (visibles y editables), y `apiPost` usa `body: any`.
+- **Riesgos conocidos (demo)**: la cookie es predecible (`userId: "1"`), los datos del comprobante viajan en la URL (visibles y editables), y la cookie `secure: true` depende de que el navegador trate `localhost` como contexto seguro (Chromium sí; Safari no).
 
 ## 7. Áreas de mejora
 
 ### Next.js
-- `"use server"` mal aplicado en `app/home/page.tsx`, `userData.tsx` y `movements.tsx` — marca exports de componentes como acciones RPC; debe eliminarse (la directiva solo corresponde a `actions.ts`).
-- Falta `error.tsx` en `home` — si `getUser` falla, el error cae fuera de los Suspense boundaries (el spec pide estado de error).
 - `getSavedContacts` podría cargarse server-side en la página y pasarse como prop, convirtiendo el formulario en isla client pura.
+- Sin `app/api/` route handlers — los datos mockeados viven en WireMock (decisión deliberada: boundary HTTP real + stubs versionados, ver `DECISIONS.md`).
 
 ### Performance
 - La simulación de caos en `apiPost` corre por request — bien, pero el delay de 5s no es abortable ni configurable.
 - Sin code splitting ni dynamic imports — aceptable por tamaño, revisar al crecer.
 
 ### Calidad
-- **Sin tests**: ni runner ni suites. Prioridad: tests unitarios de `loginUser`/`sendTransaction` (validaciones) y un E2E del flujo feliz con Playwright.
-- `body: any` en `apiPost` — tipar el payload de movements.
-- `apiPost` sin `try/catch` en el caller: un fallo de red real (fetch reject) produce un 500 genérico en vez del comprobante estilizado.
-- `label htmlFor="first_name"` no corresponde a ningún input id en `CustomInput`.
+- El retry del comprobante solo aparece en `408`; el spec espera reintento también en error de red (`500`) y desconocido (`520`).
+- El E2E cubre el happy path; los escenarios de error del comprobante solo se ejercen en Storybook/tests unitarios.
 
 ## 8. Limitaciones conocidas
 
@@ -264,4 +281,4 @@ npm run build && npm start
 
 ## 9. Tiempo invertido
 
-> **TODO: declarar horas reales invertidas en el challenge** (requerido por la rúbrica).
+8 horas invertidas

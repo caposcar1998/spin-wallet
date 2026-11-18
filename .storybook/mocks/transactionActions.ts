@@ -1,5 +1,5 @@
 import { flow, wait } from "./flow";
-import type { SavedContact } from "@/types/types";
+import type { SavedContact } from "../../types/types";
 
 export async function getSavedContacts(): Promise<SavedContact[]> {
   await wait(50);

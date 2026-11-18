@@ -14,6 +14,7 @@ export async function getUser(id: string): Promise<User> {
   cacheLife("minutes");
   cacheTag("user");
   const response = await apiGet(`/user/${id}`);
+  
   const body = await response.json();
   const created = getCreatedMovements(id);
   return {
