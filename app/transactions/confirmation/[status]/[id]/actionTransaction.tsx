@@ -38,7 +38,7 @@ export function ActionTransaction({
       {state?.error && <p data-testid="retry-error-message" className="text-sm text-red-600">{state.error}</p>}
     </form>
         )}
-    <CustomButton testId="back-to-transactions-button" message="Regresar" onClick={() => router.push("/transactions")} />
+    <CustomButton className="mt-5 ml-1" testId="back-to-transactions-button" message="Regresar" onClick={() => router.push("/transactions")} />
     </div>
   );
 }

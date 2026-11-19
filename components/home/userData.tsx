@@ -1,5 +1,6 @@
 import { getSession } from "@/lib/session";
 import { getUser } from "@/lib/users";
+import { formatCurrency } from "@/lib/format";
 import { Title } from "@/components/general/title";
 
 export default async function UserData() {
@@ -12,7 +13,7 @@ export default async function UserData() {
       </Title>
       <p className="mt-3 text-sm text-white/80">Tu saldo disponible</p>
       <Title testId="user-balance" className="text-white">
-        ${user?.balance}
+        {user ? formatCurrency(user.balance) : "—"}
       </Title>
     </div>
   );

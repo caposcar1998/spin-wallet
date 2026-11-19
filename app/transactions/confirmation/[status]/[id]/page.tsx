@@ -1,5 +1,6 @@
 import { Title } from "@/components/general/title";
 import { DetailTable } from "@/components/general/detailTable";
+import { formatCurrency } from "@/lib/format";
 import { errors } from "@/types/types";
 import { ActionTransaction } from "./actionTransaction";
 
@@ -15,18 +16,7 @@ export default async function Confirmation({
   const { status, id } = await params;
   const { cantidad, motivo, contacto } = await searchParams;
 
-  const error = errors[status as keyof typeof errors];
-
-  const motivoError =
-    status === "500"
-      ? "Reintentar"
-      : status === "400"
-        ? "Fondos insuficientes"
-        : status === "408"
-          ? "Timeout de red"
-          : status === "520"
-            ? "Error desconocido"
-            : error;
+  const motivoError = errors[status as keyof typeof errors];
 
   return (
     <div data-testid="confirmation-screen" className="flex flex-1 flex-col gap-4 items-center justify-center px-4">
@@ -37,7 +27,7 @@ export default async function Confirmation({
         className="w-full max-w-md"
         rows={[
           ...(motivoError ? [{ label: "Estado", value: motivoError }] : []),
-          { label: "Monto", value: cantidad ? `$${cantidad}` : "—" },
+          { label: "Monto", value: cantidad ? formatCurrency(Number(cantidad)) : "—" },
           { label: "Motivo", value: motivo ?? "—" },
           { label: "Contacto", value: contacto ?? "—" },
           { label: "ID", value: id },

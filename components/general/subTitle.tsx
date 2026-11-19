@@ -9,10 +9,11 @@ interface SubTitleProps {
   children: ReactNode;
   size?: keyof typeof sizes;
   className?: string;
+  testId?: string;
 }
 
-export function SubTitle({ children, size = "lg", className }: SubTitleProps) {
+export function SubTitle({ children, size = "lg", className, testId }: SubTitleProps) {
   return (
-    <h2 className={`${sizes[size]} font-semibold ${className ?? ""}`}>{children}</h2>
+    <h2 data-testid={testId} className={`${sizes[size]} font-semibold ${className ?? ""}`}>{children}</h2>
   );
 }

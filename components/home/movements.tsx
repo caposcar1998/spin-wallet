@@ -2,24 +2,24 @@ import Link from "next/link";
 import { CustomButton } from "../general/button";
 import TableMovements from "./tableMovements";
 import { getSession } from "@/lib/session";
-import { getUser } from "@/lib/users";
+import { getMovements } from "@/lib/users";
 import { Title } from "@/components/general/title";
 
 export default async function Movements() {
   const session = await getSession();
-  const user = session ? await getUser(session) : null;
+  const movements = session ? await getMovements(session) : [];
 
   return (
     <div>
       <Title>Movimientos</Title>
 
       <div className="relative bg-white shadow-sm rounded-lg border border-gray-200">
-        <TableMovements movements={user?.movements ?? []} />
-      </div>
-      <div className="flex justify-center mt-15">
+      <div className="flex justify-center mt-4 mb-4">
         <Link href="/transactions">
           <CustomButton testId="new-transaction-button" message="Nueva transacción" />
         </Link>
+      </div>
+        <TableMovements movements={movements} />
       </div>
     </div>
   );

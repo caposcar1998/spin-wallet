@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { CustomButton } from "../general/button";
+import { formatCurrency } from "@/lib/format";
 import { Movement } from "@/types/types";
 import { GeneralText } from "../general/generalText";
+import { SubTitle } from "../general/subTitle";
 
 export default function TableMovements({
   movements,
@@ -10,9 +12,9 @@ export default function TableMovements({
 }) {
   if (movements.length === 0) {
     return (
-      <p data-testid="movements-empty" className="px-6 py-8 text-center text-sm text-gray-600">
+      <SubTitle testId="movements-empty" className="text-center">
         No hay movimientos
-      </p>
+      </SubTitle>
     );
   }
 
@@ -25,7 +27,7 @@ export default function TableMovements({
             <h3 className="font-medium text-gray-900">{movement.description}</h3>
             <div className="mt-2 flex flex-col gap-1 text-sm text-gray-600">
               <p>
-                <span className="font-medium">Monto:</span> ${movement.amount}
+                <span className="font-medium">Monto:</span> {formatCurrency(movement.amount)}
               </p>
               <p>
                 <span className="font-medium">Fecha:</span> {movement.date}
@@ -78,7 +80,7 @@ export default function TableMovements({
                 <GeneralText>{movement.description}</GeneralText>
               </th>
               <td className="px-6 py-4">
-                <GeneralText>${movement.amount}</GeneralText>
+                <GeneralText>{formatCurrency(movement.amount)}</GeneralText>
               </td>
               <td className="px-6 py-4">
                 <GeneralText>{movement.date}</GeneralText>

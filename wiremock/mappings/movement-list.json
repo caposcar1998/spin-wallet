@@ -1,0 +1,53 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/user/[0-9]+/movements"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "success": true,
+      "data": [
+        {
+          "id": 1,
+          "description": "Envio a oscar",
+          "amount": 100,
+          "date": "2026-02-01",
+          "extra": "Pago GTA6",
+          "status": "completed",
+          "transactionId": "123456"
+        },
+        {
+          "id": 2,
+          "description": "Envio a Hector",
+          "amount": 150,
+          "date": "2026-02-01",
+          "extra": "Pago Zelda ocarina of time",
+          "status": "completed",
+          "transactionId": "123457"
+        },
+        {
+          "id": 3,
+          "description": "Envio a Salmay",
+          "amount": 200,
+          "date": "2026-02-01",
+          "extra": "Pago Mario Kart",
+          "status": "completed",
+          "transactionId": "123458"
+        },
+        {
+          "id": 4,
+          "description": "Envio a Fernanda",
+          "amount": 250,
+          "date": "2026-02-02",
+          "extra": "Pago Hollow Knight",
+          "status": "failed",
+          "transactionId": "123459"
+        }
+      ]
+    }
+  }
+}

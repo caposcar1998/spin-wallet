@@ -1,0 +1,36 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/user/2/movements"
+  },
+  "priority": 1,
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "success": true,
+      "data": [
+        {
+          "id": 10,
+          "description": "Envio a Oscar",
+          "amount": 50,
+          "date": "2026-02-03",
+          "extra": "Pago taquitos",
+          "status": "completed",
+          "transactionId": "123459"
+        },
+        {
+          "id": 11,
+          "description": "Envio a Pepe",
+          "amount": 75,
+          "date": "2026-02-04",
+          "extra": "Pago uber",
+          "status": "completed",
+          "transactionId": "123460"
+        }
+      ]
+    }
+  }
+}

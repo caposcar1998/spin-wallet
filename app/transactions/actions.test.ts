@@ -52,9 +52,8 @@ describe("sendTransaction", () => {
     mockGetUser.mockResolvedValue({
       id: 1,
       name: "Oscar",
-      email: "oscar@spin.com",
+      email: "oscar@gmail.com",
       balance: 100,
-      movements: [],
     });
   });
 

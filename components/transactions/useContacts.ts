@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getSavedContacts } from "@/app/transactions/actions";
+import { getSavedContacts, saveContact } from "@/app/transactions/actions";
 import type { SavedContact } from "@/types/types";
 
 export function useContacts() {
@@ -16,8 +16,8 @@ export function useContacts() {
 
   const contact = contacts.find((c) => String(c.id) === contactId)?.name ?? "";
 
-  const addContact = (name: string, cuenta: string) => {
-    const newContact: SavedContact = { id: Date.now(), name, email: cuenta };
+  const addContact = async (name: string, cuenta: string) => {
+    const newContact = await saveContact(name, cuenta);
     setContacts((prev) => [...prev, newContact]);
     setContactId(String(newContact.id));
   };

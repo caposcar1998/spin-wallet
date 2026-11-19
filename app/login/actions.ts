@@ -2,9 +2,10 @@
 
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import { getUsers } from "@/lib/users";
 
 export async function loginUser(
-  prevState: undefined | { error: string },
+  _: undefined | { error: string },
   formData: FormData,
 ) {
   const userEmail = formData.get("user") as string;
@@ -16,9 +17,16 @@ export async function loginUser(
   if (!validatePassword(userPassword)) {
     return { error: "La contraseña debe tener al menos 8 caracteres" };
   }
+  const users = await getUsers();
+  const foundUser = users.find(
+    (user) => user.email === userEmail || user.phone === userEmail,
+  );
+  if (!foundUser) {
+    return { error: "Usuario no registrado" };
+  }
 
   const cookieStore = await cookies();
-  cookieStore.set("userId", "1", {
+  cookieStore.set("userId", foundUser.id.toString(), {
     httpOnly: true,
     secure: true,
     sameSite: "lax",

@@ -65,7 +65,7 @@ Funcionalidades principales:
 │                    EXTERNAL SYSTEMS                      │
 │      WireMock (Docker :8080) — API mockeada              │
 │      GET /user/{id} · GET /users · GET /saved-contacts   │
-│      POST /user/{id}/movements                           │
+│      GET|POST /user/{id}/movements                       │
 └──────────────────────────────────────────────────────────┘
 ```
 
@@ -178,10 +178,12 @@ Dockerfile / docker-compose.yml / Makefile
 
 | Variable | Requerida | Default | Exposición | Descripción |
 |---|---|---|---|---|
-| `USERS_API_BASE_URL` | No | `http://localhost:8080` | Servidor | Base URL del backend (WireMock). En docker-compose del servicio `web` apunta a `http://wiremock:8080` |
-| `API_CHAOS` | No | caos activado | Servidor | `"false"` desactiva la simulación de errores de `apiPost` (todas las requests van a WireMock). Usado por Playwright vía `webServer` |
+| `USERS_API_BASE_URL` | No | `http://localhost:3000/api` | Servidor | Base URL del backend que consumen `apiGet`/`apiPost` — los Route Handlers propios. En docker-compose `web` apunta a `http://localhost:3000/api` |
+| `MOCK_API_URL` | No | `http://localhost:8080` | Servidor | Upstream al que los Route Handlers proxifican (WireMock). En docker-compose `web` apunta a `http://wiremock:8080` |
+| `API_CHAOS` | No | `true` | Servidor | `"false"` desactiva la simulación de errores aleatorios en `POST /api/user/:id/movements` (todas las requests proxifican a WireMock). Usado por Playwright vía `webServer` |
+| `FAKE_ERROR_LOGIN` | No | `false` | Servidor | `"true"` fuerza `loginUser` a devolver error (demo del estado de error del login) |
 
-No existen archivos `.env*` en el repo; el default cubre el desarrollo local. No hay variables `NEXT_PUBLIC_*` ni secretos en el código.
+Ver `.env.example` para la plantilla; copiar a `.env.local` para overrides locales. No hay variables `NEXT_PUBLIC_*` ni secretos en el código.
 
 ## 4. Ejecución local y pruebas
 
@@ -227,7 +229,7 @@ make e2e-debug   # Playwright Inspector — pausa antes de cada acción
 
 ### Docker y despliegue
 
-- `docker-compose.yml`: servicio `wiremock` (stubs de `wiremock/mappings/`) y `web` (build del Dockerfile, `USERS_API_BASE_URL=http://wiremock:8080`).
+- `docker-compose.yml`: servicio `wiremock` (stubs de `wiremock/mappings/`) y `web` (build del Dockerfile, env vars vía `.env.docker`: `USERS_API_BASE_URL=http://localhost:3000/api`, `MOCK_API_URL=http://wiremock:8080`).
 - `Dockerfile` presente; `output: "standalone"` en `next.config.ts` optimiza la imagen.
 
 ## 5. Estrategia de renderizado y rendimiento
@@ -258,7 +260,7 @@ make e2e-debug   # Playwright Inspector — pausa antes de cada acción
 
 ### Next.js
 - `getSavedContacts` podría cargarse server-side en la página y pasarse como prop, convirtiendo el formulario en isla client pura.
-- Sin `app/api/` route handlers — los datos mockeados viven en WireMock (decisión deliberada: boundary HTTP real + stubs versionados, ver `DECISIONS.md`).
+- `app/api/` route handlers proxifican a WireMock vía `lib/mock-api.ts` (`MOCK_API_URL`); el POST de movements simula errores aleatorios en la propia route (`API_CHAOS`). Ver `DECISIONS.md` para la justificación del proxy.
 
 ### Performance
 - La simulación de caos en `apiPost` corre por request — bien, pero el delay de 5s no es abortable ni configurable.

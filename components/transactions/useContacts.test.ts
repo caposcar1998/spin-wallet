@@ -1,17 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor, act } from "@testing-library/react";
 import { useContacts } from "./useContacts";
-import { getSavedContacts } from "@/app/transactions/actions";
+import { getSavedContacts, saveContact } from "@/app/transactions/actions";
 
 vi.mock("@/app/transactions/actions", () => ({
   getSavedContacts: vi.fn(),
+  saveContact: vi.fn(),
 }));
 
 const mockGetSavedContacts = vi.mocked(getSavedContacts);
+const mockSaveContact = vi.mocked(saveContact);
 
 const seed = [
-  { id: 1, name: "hector", email: "hector@example.com" },
-  { id: 2, name: "salmay", email: "salmay@example.com" },
+  { id: 1, name: "hector", email: "hector@gmail.com" },
+  { id: 2, name: "salmay", email: "salmay@gmail.com" },
 ];
 
 describe("useContacts", () => {
@@ -56,16 +58,17 @@ describe("useContacts", () => {
     expect(result.current.contact).toBe("");
   });
 
-  it("addContact appends the contact and selects it", async () => {
+  it("addContact persists via the server action and selects it", async () => {
+    const created = { id: 3, name: "nuevo", email: "nuevo@gmail.com" };
+    mockSaveContact.mockResolvedValue(created);
     const { result } = renderHook(() => useContacts());
     await waitFor(() => expect(result.current.contacts).toHaveLength(2));
 
-    act(() => result.current.addContact("nuevo", "nuevo@example.com"));
+    await act(() => result.current.addContact("nuevo", "nuevo@gmail.com"));
 
+    expect(mockSaveContact).toHaveBeenCalledWith("nuevo", "nuevo@gmail.com");
     expect(result.current.contacts).toHaveLength(3);
-    const created = result.current.contacts[2];
-    expect(created.name).toBe("nuevo");
-    expect(created.email).toBe("nuevo@example.com");
+    expect(result.current.contacts[2]).toEqual(created);
     expect(result.current.contactId).toBe(String(created.id));
     expect(result.current.contact).toBe("nuevo");
   });

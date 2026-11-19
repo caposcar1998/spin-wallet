@@ -1,6 +1,7 @@
 import { getSession } from "@/lib/session";
 import { logout } from "@/components/actions";
 import Image from "next/image";
+import Link from "next/link";
 import spinLogo from "@/public/spin.jpeg";
 import { Suspense } from "react";
 import { Title } from "@/components/general/title";
@@ -10,10 +11,10 @@ export function Header() {
   return (
     <header className="flex items-center justify-between px-6 py-3 bg-primary shadow-md">
       <div className="flex items-center gap-2">
-        <a href="/">
-          <Image src={spinLogo} alt="Spin wallet" width={44} height={44} className="rounded-lg" />
+        <Link href="/" className="flex items-center gap-2">
+          <Image src={spinLogo} alt="Spin wallet" width={44} height={44} className="rounded-lg" data-testid="spin-logo" />
           <Title size="sm" className="text-white">Spin wallet</Title>
-        </a>
+        </Link>
       </div>
       <Suspense fallback={<GeneralText className="text-white/80">La cartera de tus sueños</GeneralText>}>
         <HeaderSession />

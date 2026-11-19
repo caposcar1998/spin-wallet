@@ -21,14 +21,16 @@ export interface Movement {
   date: string;
   extra: string;
   status: string;
+  contact?: string;
+  transactionId?: string;
 }
 
 export interface User {
   id: number;
   name: string;
   email: string;
+  phone?: string;
   balance: number;
-  movements: Movement[];
 }
 
 export interface SavedContact {

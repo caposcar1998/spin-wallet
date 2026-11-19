@@ -1,5 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { loginUser } from "./actions";
+import { getUsers } from "@/lib/users";
+
+vi.mock("@/lib/users", () => ({
+  getUsers: vi.fn(),
+}));
+
+const mockGetUsers = vi.mocked(getUsers);
+
+const seedUsers = [
+  { id: 1, name: "Oscar", email: "oscar@gmail.com", phone: "5512345678", balance: 100 },
+];
 
 const cookieSet = vi.fn();
 vi.mock("next/headers", () => ({
@@ -22,6 +33,7 @@ function makeFormData(user: string, password: string) {
 describe("loginUser", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetUsers.mockResolvedValue(seedUsers);
   });
 
   it("rejects an invalid email/phone format", async () => {
@@ -31,15 +43,21 @@ describe("loginUser", () => {
   });
 
   it("rejects a password shorter than 8 characters", async () => {
-    const result = await loginUser(undefined, makeFormData("oscar@spin.com", "123"));
+    const result = await loginUser(undefined, makeFormData("oscar@gmail.com", "123"));
     expect(result).toEqual({ error: "La contraseña debe tener al menos 8 caracteres" });
+    expect(cookieSet).not.toHaveBeenCalled();
+  });
+
+  it("rejects an unregistered user", async () => {
+    const result = await loginUser(undefined, makeFormData("nadie@gmail.com", "12345678"));
+    expect(result).toEqual({ error: "Usuario no registrado" });
     expect(cookieSet).not.toHaveBeenCalled();
   });
 
   it("accepts a valid email", async () => {
     vi.useFakeTimers();
     const assertion = expect(
-      loginUser(undefined, makeFormData("oscar@spin.com", "12345678")),
+      loginUser(undefined, makeFormData("oscar@gmail.com", "12345678")),
     ).rejects.toThrow("NEXT_REDIRECT:/home");
     await vi.advanceTimersByTimeAsync(2000);
     await assertion;
@@ -55,5 +73,6 @@ describe("loginUser", () => {
     await vi.advanceTimersByTimeAsync(2000);
     await assertion;
     vi.useRealTimers();
+    expect(cookieSet).toHaveBeenCalledWith("userId", "1", expect.objectContaining({ httpOnly: true }));
   });
 });

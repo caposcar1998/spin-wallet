@@ -14,12 +14,12 @@
         {
           "id": 1,
           "name": "hector",
-          "email": "hector@example.com"
+          "email": "hector@gmail.com"
         },
         {
           "id": 2,
           "name": "salmay",
-          "email": "salmay@example.com"
+          "email": "salmay@gmail.com"
         }
       ]
     }

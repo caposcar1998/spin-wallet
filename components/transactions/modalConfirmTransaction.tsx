@@ -2,6 +2,7 @@
 
 import { CustomButton } from "../general/button";
 import { CloseButton } from "../general/closeButton";
+import { formatCurrency } from "@/lib/format";
 
 export function ModalConfirmTransaction({
   isOpen,
@@ -32,7 +33,7 @@ export function ModalConfirmTransaction({
         <dl className="flex flex-col gap-2 text-sm text-gray-700">
           <div className="flex justify-between">
             <dt className="font-medium text-gray-500">Cantidad</dt>
-            <dd className="font-semibold text-gray-900">${quantity}</dd>
+            <dd className="font-semibold text-gray-900">{formatCurrency(quantity)}</dd>
           </div>
           <div className="flex justify-between">
             <dt className="font-medium text-gray-500">Razón</dt>

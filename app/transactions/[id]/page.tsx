@@ -1,5 +1,6 @@
 import { getSession } from "@/lib/session";
-import { getUser } from "@/lib/users";
+import { getMovements } from "@/lib/users";
+import { formatCurrency } from "@/lib/format";
 import { Title } from "@/components/general/title";
 import { DetailTable } from "@/components/general/detailTable";
 
@@ -12,8 +13,9 @@ export default async function Transaction({
 }) {
   const { id } = await params;
   const session = await getSession();
-  const user = session ? await getUser(session) : null;
-  const movement = user?.movements.find((m) => m.id === Number(id));
+  const movements = session ? await getMovements(session) : [];
+  const movement = movements.find((m) => m.id === Number(id));
+  const movementStatusSpanish = movement?.status === 'completed' ? 'completado' : 'fallido';
 
   if (!movement) {
     return (
@@ -29,10 +31,11 @@ export default async function Transaction({
       <DetailTable
         className="w-full max-w-md"
         rows={[
-          { label: "Monto", value: `$${movement.amount}` },
+          { label: "Monto", value: formatCurrency(movement.amount) },
           { label: "Fecha", value: movement.date },
-          { label: "Estado", value: movement.status },
+          { label: "Estado", value: movementStatusSpanish },
           { label: "Descripción", value: movement.extra },
+          { label: "ID de transacción", value: movement.transactionId },
         ]}
       />
     </div>

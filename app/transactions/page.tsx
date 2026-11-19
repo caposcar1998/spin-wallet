@@ -42,7 +42,7 @@ export default function Transactions() {
           setShowConfirmModal(true);
         }}
       >
-        <CustomInput type="number" name="Cantidad" required testId="transaction-amount-input" onChange={(e) => setQuantity(Number(e.target.value))} />
+        <CustomInput type="number" name="Cantidad" required step="0.01" min="0.01" inputMode="decimal" testId="transaction-amount-input" onChange={(e) => setQuantity(Number(e.target.value))} />
         <div className="h-3" />
         <CustomInput type="text" name="Motivo" required testId="transaction-reason-input" onChange={(e) => setReason(e.target.value)} />
         <div className="h-3" />

@@ -1,4 +1,4 @@
-.PHONY: up down logs restart clean dev build
+.PHONY: up down logs restart clean dev build test e2e e2e-ui e2e-debug e2e-prepare
 
 up:
 	docker compose up -d --build
@@ -27,14 +27,17 @@ build:
 test:
 	npm run test
 
-e2e:
+# Free :3000 so Playwright boots its own dev server with API_CHAOS=false
+# (it reuses an existing server otherwise, inheriting whatever env it has)
+e2e-prepare:
 	docker compose up -d wiremock
+	-lsof -ti:3000 | xargs kill
+
+e2e: e2e-prepare
 	npm run test:e2e
 
-e2e-ui:
-	docker compose up -d wiremock
+e2e-ui: e2e-prepare
 	npm run test:e2e:ui
 
-e2e-debug:
-	docker compose up -d wiremock
+e2e-debug: e2e-prepare
 	npm run test:e2e:debug

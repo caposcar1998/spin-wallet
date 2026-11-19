@@ -4,7 +4,7 @@ test('full wallet flow: login → home → nueva transacción → comprobante', 
   await test.step('Login', async () => {
     await page.goto('/');
     await page.getByTestId('go-login-button').click();
-    await page.getByTestId('login-user-input').fill('oscar@spin.com');
+    await page.getByTestId('login-user-input').fill('oscar@gmail.com');
     await page.getByTestId('login-password-input').fill('12345678');
     await page.getByTestId('login-submit-button').click();
     await page.waitForURL('**/home', { timeout: 15_000 });
@@ -28,12 +28,11 @@ test('full wallet flow: login → home → nueva transacción → comprobante', 
   });
 
   await test.step('Confirmación', async () => {
-    await expect(page.getByTestId('confirm-transaction-modal')).toContainText(
-      'Cantidad: 25',
-    );
-    await expect(page.getByTestId('confirm-transaction-modal')).toContainText(
-      'Contacto: hector',
-    );
+    const modal = page.getByTestId('confirm-transaction-modal');
+    await expect(modal).toContainText('Cantidad');
+    await expect(modal).toContainText('$25');
+    await expect(modal).toContainText('Contacto');
+    await expect(modal).toContainText('hector');
     await page.getByTestId('confirm-transaction-button').click();
     await page.waitForURL('**/transactions/confirmation/201/**', {
       timeout: 15_000,
@@ -52,5 +51,9 @@ test('full wallet flow: login → home → nueva transacción → comprobante', 
     await expect(page.getByTestId('back-to-transactions-button')).toBeVisible();
     await page.getByTestId('back-to-transactions-button').click();
     await page.waitForURL('**/transactions');
+    await expect(page.getByTestId('spin-logo')).toBeVisible();
+    await page.getByTestId('spin-logo').click();
+    await expect(page.getByTestId('user-name')).toBeVisible();
+    await expect(page.getByTestId('user-balance')).toBeVisible();
   });
 });

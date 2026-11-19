@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "urlPath": "/users"
+    "urlPathPattern": "/users"
   },
   "response": {
     "status": 200,
@@ -14,14 +14,30 @@
         {
           "id": 1,
           "name": "Oscar",
-          "email": "oscar@example.com",
+          "email": "oscar@gmail.com",
+          "phone": "5512345678",
           "balance": 100
         },
         {
           "id": 2,
-          "name": "John",
-          "email": "john@example.com",
+          "name": "Hector",
+          "email": "hector@gmail.com",
+          "phone": "5523456789",
           "balance": 200
+        },
+        {
+          "id": 3,
+          "name": "Salmay",
+          "email": "salmay@gmail.com",
+          "phone": "5534567890",
+          "balance": 300
+        },
+        {
+          "id": 4,
+          "name": "Pepe",
+          "email": "pepe@gmail.com",
+          "phone": "5545678901",
+          "balance": 500
         }
       ]
     }

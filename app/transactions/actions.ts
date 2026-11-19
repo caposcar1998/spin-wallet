@@ -1,7 +1,9 @@
 "use server";
 
 import { apiGet, apiPost } from "@/lib/api";
+import { roundMoney } from "@/lib/format";
 import { addMovement } from "@/lib/movements";
+import { addSavedContact, getCreatedContacts } from "@/lib/contacts";
 import { getUser } from "@/lib/users";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
@@ -33,7 +35,7 @@ export async function sendTransaction(
 
   const user = await getUser(session);
   if (amount > user.balance) {
-    return { error: `Fondos insuficientes, te faltan ${amount - user.balance} pesos` };
+    return { error: `Fondos insuficientes, te faltan ${roundMoney(amount - user.balance)} pesos` };
   }
 
   const params = new URLSearchParams({
@@ -43,6 +45,7 @@ export async function sendTransaction(
   });
 
   let response: Response;
+  const randomTransactionId = Math.floor(Math.random() * 1000000);
   try {
     response = await apiPost(`/user/${session}/movements`, {
       cantidad: amount,
@@ -50,11 +53,12 @@ export async function sendTransaction(
       contacto,
     });
   } catch {
-    redirect(`/transactions/confirmation/520/123456?${params}`);
+    redirect(`/transactions/confirmation/520/${randomTransactionId}?${params}`);
   }
 
   addMovement(session, {
-    id: Date.now(),
+    id: randomTransactionId,
+    transactionId: String(randomTransactionId),
     description: `Envio a ${String(contacto).trim()}`,
     amount,
     date: new Date().toISOString().slice(0, 10),
@@ -62,11 +66,20 @@ export async function sendTransaction(
     status: response.ok ? "completed" : "failed",
   });
   updateTag("user");
-  redirect(`/transactions/confirmation/${response.status}/123456?${params}`);
+  redirect(`/transactions/confirmation/${response.status}/${randomTransactionId}?${params}`);
 }
 
 export async function getSavedContacts(): Promise<SavedContact[]> {
   const response = await apiGet("/saved-contacts");
   const body = await response.json();
-  return body.data ?? [];
+  return [...(body.data ?? []), ...getCreatedContacts()];
+}
+
+export async function saveContact(
+  name: string,
+  email: string,
+): Promise<SavedContact> {
+  const contact: SavedContact = { id: Date.now(), name, email };
+  addSavedContact(contact);
+  return contact;
 }

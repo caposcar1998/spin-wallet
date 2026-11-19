@@ -1,0 +1,27 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/user/3/movements"
+  },
+  "priority": 1,
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "success": true,
+      "data": [
+        {
+          "id": 20,
+          "description": "Envio a Salmay",
+          "amount": 120,
+          "date": "2026-02-05",
+          "extra": "Pago concierto",
+          "status": "completed",
+          "transactionId": "123461"
+        }
+      ]
+    }
+  }
+}
