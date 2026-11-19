@@ -45,7 +45,7 @@ Copiar el archivo `.env.example` a `.env`, en caso de usar `make up` no es neces
 | `API_CHAOS` | No | `true` | Servidor | `"false"` desactiva la inyección de errores aleatorios en `POST /api/user/:id/movements`. Lo usa Playwright vía `webServer` |
 | `FAKE_ERROR_LOGIN` | No | `false` | Servidor | `"true"` hace que `getUsers` devuelva `[]` (→ "Usuario no registrado") y agrega 2s de latencia en `getUser` |
 | `API_TIMEOUT_MS` | No | `10000` | Servidor | Timeout en ms de `apiGet`/`apiPost` contra la API propia. Bájalo (p. ej. `2000`) para ver el comprobante `408` sin esperar |
-| `CHAOS_DELAY_MS` | No | `5000` | Servidor | Ms que duerme cada POST de transacción cuando el caos está activo (`API_CHAOS≠false`) — todos los flujos responden lento. Súbelo por encima de `API_TIMEOUT_MS` para que todos terminen en timeout |
+| `CHAOS_DELAY_MS` | No | `0` | Servidor | Ms que duerme cada POST de transacción cuando el caos está activo (`API_CHAOS≠false`). `0` = sin delay global; súbelo para volver lentos todos los flujos, o por encima de `API_TIMEOUT_MS` para que todos terminen en timeout |
 | `LOGIN_DELAY_MS` | No | `500` | Servidor | Ms que espera `loginUser` antes de redirigir a `/home` (latencia simulada de login) |
 | `CHAOS_408_DELAY_MS` | No | `3000` | Servidor | Ms extra que duerme la rama `408` del caos — se suman a `CHAOS_DELAY_MS` — para simular el hang de red |
 
@@ -200,9 +200,9 @@ Server Component / Action
          → WireMock :8080
 ```
 
-**Route Handlers** (`app/api/`): proxifican a WireMock vía `proxyToMock`. El `POST /user/{id}/movements` además inyecta **caos por request**: con el caos activo, cada POST espera `CHAOS_DELAY_MS` (default 5s) antes de responder — todos los flujos son lentos — y luego sortea: 25% proxifica real a WireMock, 15% `500`, 20% `400` (fondos insuficientes), 20% `408` (Timeout de red — espera `CHAOS_408_DELAY_MS` extra, default 3s, para simular el hang), 20% `520`. Es el motor de los escenarios aleatorios del comprobante. El kill-switch `API_CHAOS=false` lo desactiva (lo usan los tests E2E para un happy path determinista). El caos vive en la capa de API — `apiPost` es transporte puro que cualquier consumidor puede usar sin heredar fallos aleatorios.
+**Route Handlers** (`app/api/`): proxifican a WireMock vía `proxyToMock`. El `POST /user/{id}/movements` además inyecta **caos por request**: con el caos activo, cada POST espera `CHAOS_DELAY_MS` (default 0, sin delay global) y luego sortea: 25% proxifica real a WireMock, 15% `500`, 20% `400` (fondos insuficientes), 20% `408` (Timeout de red — espera `CHAOS_408_DELAY_MS` extra, default 3s, para simular el hang), 20% `520`. Es el motor de los escenarios aleatorios del comprobante. El kill-switch `API_CHAOS=false` lo desactiva (lo usan los tests E2E para un happy path determinista). El caos vive en la capa de API — `apiPost` es transporte puro que cualquier consumidor puede usar sin heredar fallos aleatorios.
 
-Ambas capas HTTP usan `AbortSignal.timeout`: `API_TIMEOUT_MS` (default 10s) en `apiGet`/`apiPost` y 5s en `proxyToMock`; el caos duerme `CHAOS_DELAY_MS` (default 5s) en cada POST cuando está activo. Si WireMock no contesta a tiempo, el proxy responde `504`; si el timeout ocurre en `sendTransaction`, el comprobante muestra `408` (Timeout de red) en vez de `520`.
+Ambas capas HTTP usan `AbortSignal.timeout`: `API_TIMEOUT_MS` (default 10s) en `apiGet`/`apiPost` y 5s en `proxyToMock`; el caos duerme `CHAOS_DELAY_MS` (default 0) en cada POST cuando está activo. Si WireMock no contesta a tiempo, el proxy responde `504`; si el timeout ocurre en `sendTransaction`, el comprobante muestra `408` (Timeout de red) en vez de `520`.
 
 **Server Actions** (`"use server"`):
 
@@ -277,7 +277,7 @@ proxy.ts                          # Guard de rutas por cookie
 tests/wallet-flow.spec.ts         # Playwright E2E del flujo completo
 **/*.test.ts(x)                   # Suites Vitest colocalizadas (63 tests)
 vitest.config.ts / vitest.setup.ts
-playwright.config.ts              # webServer: API_CHAOS=false npm run dev
+playwright.config.ts              # webServer: API_CHAOS=false LOGIN_DELAY_MS=0 npm run dev
 Dockerfile / docker-compose.yml / Makefile
 .env.example                      # Plantilla de variables (commiteada)
 ```
