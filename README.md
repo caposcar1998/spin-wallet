@@ -22,16 +22,19 @@ Funcionalidades principales:
 
 ## 2. Cómo correrlo
 
-### Instalación
+### Build y producción
+
 
 ```bash
-cp .env.example .env   # variables locales (ver tabla abajo)
-npm install
+# Todo containerizado (web + wiremock en Docker):
+make up           # docker compose up -d --build → http://localhost:3000
 ```
 
-Package manager: **npm** (`package-lock.json`).
+### Instalación
 
-### Variables de entorno
+#### Variables de entorno
+
+Copiar el archivo `.env.example` a `.env`, en caso de usar `make up` no es necesario configurar las variables de entorno.
 
 | Variable | Requerida | Default | Exposición | Descripción |
 |---|---|---|---|---|
@@ -40,17 +43,32 @@ Package manager: **npm** (`package-lock.json`).
 | `API_CHAOS` | No | `true` | Servidor | `"false"` desactiva la inyección de errores aleatorios en `POST /api/user/:id/movements`. Lo usa Playwright vía `webServer` |
 | `FAKE_ERROR_LOGIN` | No | `false` | Servidor | `"true"` hace que `getUsers` devuelva `[]` (→ "Usuario no registrado") y agrega 2s de latencia en `getUser` |
 
-Ver `.env.example` para la plantilla; copiar a `.env` para overrides locales. No hay variables `NEXT_PUBLIC_*` ni secretos en el código.
-
-⚠️ `docker-compose.yml` referencia `env_file: .env`, que está gitignored — en un clone fresco hay que crear `.env` desde `.env.example` antes de `docker compose up`.
-
-### Desarrollo
-
 ```bash
-make dev          # docker compose up -d wiremock + npm run dev
+cp .env.example .env   # variables locales (ver tabla abajo)
+npm install            # solo necesario para desarrollo local (make dev)
+                       # para docker (make up) el npm ci corre dentro de la imagen
+make dev               # docker compose up -d wiremock + npm run dev
 # o manualmente:
 docker compose up -d wiremock
 npm run dev       # http://localhost:3000
+```
+
+### Pruebas
+
+```bash
+npm install    
+make test
+```
+
+### Pruebas e2e
+
+```bash
+docker compose up -d wiremock # levanta el mock de wiremock
+npm install    
+npx playwright install chromium
+make e2e         # Playwright headed — recorre el flujo completo en el navegador
+make e2e-ui      # Playwright UI mode (watch, time-travel, re-run)
+make e2e-debug   # Playwright Inspector — pausa antes de cada acción
 ```
 
 ### Usuarios demo
@@ -64,39 +82,6 @@ Cualquier password ≥ 8 caracteres. Cada usuario tiene datos propios:
 | `salmay@gmail.com` | `5534567890` | $300, 1 movimiento |
 | `pepe@gmail.com` | `5545678901` | $500, 0 movimientos (estado vacío) |
 
-### Build y producción
-
-Dos opciones (una u otra, no ambas — usan el mismo puerto):
-
-```bash
-# Producción local (requiere wiremock corriendo):
-npm run build && npm start
-
-# Todo containerizado (web + wiremock en Docker):
-make up           # docker compose up -d --build → http://localhost:3000
-```
-
-### Pruebas
-
-```bash
-make test        # Vitest — 50 tests: acciones, validaciones y componentes críticos
-make e2e         # Playwright headed — recorre el flujo completo en el navegador
-make e2e-ui      # Playwright UI mode (watch, time-travel, re-run)
-make e2e-debug   # Playwright Inspector — pausa antes de cada acción
-```
-
-- `npm run test` / `npm run test:watch` — Vitest 4 + jsdom + Testing Library. Suites colocalizadas (`*.test.ts(x)`): server actions (`loginUser`, `sendTransaction`), modales, tabla de movimientos, retry del comprobante.
-- `npm run test:e2e` — Playwright (chromium headed + `--slow-mo`). `playwright.config.ts` levanta `npm run dev` con `API_CHAOS=false` vía `webServer`; `tests/wallet-flow.spec.ts` recorre Login → Home → Transacción → Comprobante con `test.step`.
-- ⚠️ Los targets `make e2e*` liberan el puerto 3000 primero (`e2e-prepare`): Playwright reutiliza un server existente con el env que tenga (caos activo → test flaky), así que los targets matan cualquier proceso en :3000 para que arranque su propio server determinista.
-- `npm run lint` — ESLint 9 + eslint-config-next
-- `npx tsc --noEmit` — type checking
-- `npm run format` — Prettier
-
-### Docker y despliegue
-
-- `docker-compose.yml`: servicio `wiremock` (stubs de `wiremock/mappings/` montados como volumen) y `web` (build del Dockerfile, env vars vía `env_file: .env` con `MOCK_API_URL=http://wiremock:8080`).
-- `Dockerfile` presente; `output: "standalone"` en `next.config.ts` optimiza la imagen.
-- `make up` levanta todo containerizado; `make down`/`logs`/`restart`/`clean` gestionan el stack.
 
 ## 3. Diseño de arquitectura (flujo en terminal)
 
@@ -203,7 +188,7 @@ Arquitectura de dos capas HTTP, todo server-side:
 
 ```
 Server Component / Action
-   → lib/api.ts        (cliente HTTP "tonto": apiGet / apiPost, sin lógica)
+   → lib/api.ts        (cliente HTTP simple: apiGet / apiPost, sin lógica)
      → app/api/*       (Route Handlers propios — la "API mockeada")
        → lib/mock-api.ts (proxyToMock: reenvía request/response, 502 si cae)
          → WireMock :8080
@@ -313,25 +298,6 @@ Dockerfile / docker-compose.yml / Makefile
 - **Secretos**: ninguno en el código; las variables son URLs públicas del mock.
 - **Acciones expuestas**: los módulos `"use server"` son endpoints RPC públicos; las validaciones viven ahí precisamente porque la UI es bypasseable.
 - **Riesgos conocidos (demo)**: los datos del comprobante viajan en la URL (visibles y editables), y la cookie `secure: true` depende de que el navegador trate `localhost` como contexto seguro (Chromium sí; Safari no).
-
-## 6. Áreas de mejora
-
-### Arquitectura
-- El comprobante podría resolverse por `transactionId` contra `lib/movements` en lugar de confiar en query params (eliminaría la edición por URL); hoy los params son necesarios porque la rama de error de red (520) no llega a registrar el movimiento.
-- `getSavedContacts` podría cargarse server-side en la página y pasarse como prop, convirtiendo el formulario en isla client pura.
-
-### Next.js
-- `getUsers` devuelve `body.data` sin validar — si la API cae devuelve `undefined` y el `.find` en `loginUser` revienta con `TypeError` en lugar de un error controlado.
-- El delay de 5s del timeout simulado no es abortable ni configurable.
-
-### Performance
-- Sin code splitting ni dynamic imports — aceptable por tamaño, revisar al crecer.
-- `getUser` y `getMovements` hacen dos fetches separados a WireMock por render de home — trade-off aceptado por la simetría REST.
-
-### Calidad
-- El E2E cubre el happy path; los escenarios de error del comprobante solo se ejercen en tests unitarios y manualmente (pendiente: specs de retry/500/timeout, posible con WireMock scenarios).
-- El patrón de reset de alert en `login/page.tsx` y `transactions/page.tsx` está duplicado — candidato a custom hook (`useAutoResetAlert`).
-
 
 ## 8. Tiempo invertido
 

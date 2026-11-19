@@ -10,7 +10,8 @@ services:
     build: .
     ports:
       - "3000:3000"
-    env_file:
-      - .env
+    environment:
+      - MOCK_API_URL=http://wiremock:8080
     depends_on:
       - wiremock
+
