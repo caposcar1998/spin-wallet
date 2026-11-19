@@ -18,6 +18,9 @@ export async function loginUser(
     return { error: "La contraseña debe tener al menos 8 caracteres" };
   }
   const users = await getUsers();
+  if (!users) {
+    return { error: "Error al obtener los usuarios" };
+  }
   const foundUser = users.find(
     (user) => user.email === userEmail || user.phone === userEmail,
   );

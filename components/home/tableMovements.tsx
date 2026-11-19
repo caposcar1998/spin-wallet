@@ -33,7 +33,7 @@ export default function TableMovements({
                 <span className="font-medium">Fecha:</span> {movement.date}
               </p>
               <p>
-                <span className="font-medium">Estado:</span> {movement.status}
+                <span className="font-medium">Estado:</span> {movement.status === "completed" ? "✅" : "❌"}
               </p>
             </div>
             <div className="mt-3">
