@@ -1,5 +1,5 @@
 import { getSession } from "@/lib/session";
-import { logout } from "@/components/actions";
+import { logout } from "@/app/login/actions";
 import Image from "next/image";
 import Link from "next/link";
 import spinLogo from "@/public/spin.jpeg";

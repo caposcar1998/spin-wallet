@@ -1,6 +1,7 @@
 "use server";
 
 import { apiGet, apiPost } from "@/lib/api";
+import { SAVED_CONTACTS_PATH, userMovementsPath } from "@/lib/api-paths";
 import { roundMoney } from "@/lib/format";
 import { addMovement } from "@/lib/movements";
 import { addSavedContact, getCreatedContacts } from "@/lib/contacts";
@@ -47,7 +48,7 @@ export async function sendTransaction(
   let response: Response;
   const transactionId = Date.now();
   try {
-    response = await apiPost(`/user/${session}/movements`, {
+    response = await apiPost(userMovementsPath(session), {
       cantidad: amount,
       motivo: String(motivo).trim(),
       contacto,
@@ -72,7 +73,7 @@ export async function sendTransaction(
 export async function getSavedContacts(): Promise<SavedContact[]> {
   const session = await getSession();
   if (!session) redirect("/login");
-  const response = await apiGet("/saved-contacts");
+  const response = await apiGet(SAVED_CONTACTS_PATH);
   const body = await response.json();
   return [...(body.data ?? []), ...getCreatedContacts()];
 }

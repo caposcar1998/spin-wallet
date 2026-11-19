@@ -203,7 +203,7 @@ Server Component / Action
 | `loginUser` | `app/login/actions.ts` | Valida formato y contraseña → lookup del usuario en `getUsers()` (email o teléfono) → cookie `userId` con su id → delay de 2s → redirect a `/home` |
 | `sendTransaction` | `app/transactions/actions.ts` | Valida monto/motivo/contacto/saldo → `apiPost` → `addMovement` (completed/failed) → `updateTag` → redirect a confirmación con un `transactionId` generado server-side (`Date.now()`, mismo patrón que los contactos) |
 | `getSavedContacts` | `app/transactions/actions.ts` | GET `/saved-contacts` fusionado con contactos creados |
-| `logout` | `components/actions.ts` | Borra sesión, redirect a `/` |
+| `logout` | `app/login/actions.ts` | Borra sesión, redirect a `/` |
 
 **Persistencia mockeada** (en memoria del proceso Node, keyed por userId donde aplica):
 
@@ -235,7 +235,7 @@ app/
 │   └── saved-contacts/route.ts   # GET → proxy /saved-contacts
 ├── login/
 │   ├── page.tsx                  # Formulario (client) + useActionState
-│   └── actions.ts                # loginUser (server action)
+│   └── actions.ts                # loginUser / logout (server actions)
 ├── home/
 │   ├── page.tsx                  # Suspense: UserData + Movements (server)
 │   └── error.tsx                 # Error boundary del segmento (client)
@@ -247,7 +247,6 @@ app/
 │       ├── page.tsx              # Comprobante (server, params+searchParams)
 │       └── actionTransaction.tsx # Reintentar (form action) + Regresar (client)
 components/
-├── actions.ts                    # logout (server action)
 ├── header.tsx / footer.tsx / alert.tsx
 ├── contacts/modalContact.tsx     # Alta de contacto (client, onSave prop)
 ├── home/                         # userData / movements / tableMovements

@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
+import { clearSession } from "@/lib/session";
 import { getUsers } from "@/lib/users";
 
 export async function loginUser(
@@ -37,6 +38,11 @@ export async function loginUser(
   });
   await new Promise((resolve) => setTimeout(resolve, 2000));
   redirect("/home");
+}
+
+export async function logout() {
+  await clearSession();
+  redirect("/");
 }
 
 function validateUser(user: string) {

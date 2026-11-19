@@ -1,3 +1,4 @@
+import { userPath } from "@/lib/api-paths";
 import { proxyToMock } from "@/lib/mock-api";
 
 export async function GET(
@@ -5,5 +6,5 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  return proxyToMock(`/user/${id}`);
+  return proxyToMock(userPath(id));
 }

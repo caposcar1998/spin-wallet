@@ -1,3 +1,4 @@
+import { userMovementsPath } from "@/lib/api-paths";
 import { proxyToMock } from "@/lib/mock-api";
 
 export async function GET(
@@ -5,7 +6,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  return proxyToMock(`/user/${id}/movements`);
+  return proxyToMock(userMovementsPath(id));
 }
 
 function jsonError(error: string, status: number) {
@@ -28,7 +29,7 @@ export async function POST(
     return jsonError("Error desconocido", 520);
   }
   const body = await request.text();
-  return proxyToMock(`/user/${id}/movements`, {
+  return proxyToMock(userMovementsPath(id), {
     method: "POST",
     headers: {
       "Content-Type":
