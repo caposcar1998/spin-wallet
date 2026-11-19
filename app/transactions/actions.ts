@@ -45,7 +45,7 @@ export async function sendTransaction(
   });
 
   let response: Response;
-  const randomTransactionId = Math.floor(Math.random() * 1000000);
+  const transactionId = Date.now();
   try {
     response = await apiPost(`/user/${session}/movements`, {
       cantidad: amount,
@@ -53,12 +53,12 @@ export async function sendTransaction(
       contacto,
     });
   } catch {
-    redirect(`/transactions/confirmation/520/${randomTransactionId}?${params}`);
+    redirect(`/transactions/confirmation/520/${transactionId}?${params}`);
   }
 
   addMovement(session, {
-    id: randomTransactionId,
-    transactionId: String(randomTransactionId),
+    id: transactionId,
+    transactionId: String(transactionId),
     description: `Envio a ${String(contacto).trim()}`,
     amount,
     date: new Date().toISOString().slice(0, 10),
@@ -66,10 +66,12 @@ export async function sendTransaction(
     status: response.ok ? "completed" : "failed",
   });
   updateTag("user");
-  redirect(`/transactions/confirmation/${response.status}/${randomTransactionId}?${params}`);
+  redirect(`/transactions/confirmation/${response.status}/${transactionId}?${params}`);
 }
 
 export async function getSavedContacts(): Promise<SavedContact[]> {
+  const session = await getSession();
+  if (!session) redirect("/login");
   const response = await apiGet("/saved-contacts");
   const body = await response.json();
   return [...(body.data ?? []), ...getCreatedContacts()];
@@ -79,6 +81,8 @@ export async function saveContact(
   name: string,
   email: string,
 ): Promise<SavedContact> {
+  const session = await getSession();
+  if (!session) redirect("/login");
   const contact: SavedContact = { id: Date.now(), name, email };
   addSavedContact(contact);
   return contact;

@@ -8,8 +8,8 @@ export async function loginUser(
   _: undefined | { error: string },
   formData: FormData,
 ) {
-  const userEmail = formData.get("user") as string;
-  const userPassword = formData.get("password") as string;
+  const userEmail = String(formData.get("user") ?? "");
+  const userPassword = String(formData.get("password") ?? "");
 
   if (!validateUser(userEmail)) {
     return { error: "Formato invalido para correo/telefono" };
@@ -31,7 +31,7 @@ export async function loginUser(
   const cookieStore = await cookies();
   cookieStore.set("userId", foundUser.id.toString(), {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: 5 * 60,
   });

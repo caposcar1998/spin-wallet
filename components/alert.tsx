@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertProps } from "@/types/types";
+import type { AlertProps } from "@/types/types";
 import { CloseButton } from "./general/closeButton";
 
 const accents = {

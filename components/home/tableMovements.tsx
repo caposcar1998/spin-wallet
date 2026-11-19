@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CustomButton } from "../general/button";
 import { formatCurrency } from "@/lib/format";
-import { Movement } from "@/types/types";
+import type { Movement } from "@/types/types";
 import { GeneralText } from "../general/generalText";
 import { SubTitle } from "../general/subTitle";
 

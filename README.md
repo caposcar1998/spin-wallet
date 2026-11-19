@@ -178,7 +178,7 @@ Browser → proxy.ts (guard por cookie) → Layout (Header/Footer)
 ```
 
 - **Rutas dinámicas**: `[id]` en detalle; `[status]` + `[id]` anidados en confirmación.
-- **Datos del comprobante por query string**: `?cantidad=&motivo=&contacto=` leídos vía `searchParams` (limitación conocida — ver §7).
+- **Datos del comprobante por query string**: `?cantidad=&motivo=&contacto=` leídos vía `searchParams` (limitación conocida).
 - **Navegación**: `Link` en tabla de movimientos, landing y header; `router.push`/`router.back()` en botones client; `redirect()` dentro de Server Actions.
 - **`app/loading.tsx`**, **`app/not-found.tsx`** y **`app/home/error.tsx`** presentes; el resto de rutas no tiene `error.tsx` propio.
 
@@ -201,7 +201,7 @@ Server Component / Action
 | Action | Archivo | Rol |
 |---|---|---|
 | `loginUser` | `app/login/actions.ts` | Valida formato y contraseña → lookup del usuario en `getUsers()` (email o teléfono) → cookie `userId` con su id → delay de 2s → redirect a `/home` |
-| `sendTransaction` | `app/transactions/actions.ts` | Valida monto/motivo/contacto/saldo → `apiPost` → `addMovement` (completed/failed) → `updateTag` → redirect a confirmación con el `transactionId` real |
+| `sendTransaction` | `app/transactions/actions.ts` | Valida monto/motivo/contacto/saldo → `apiPost` → `addMovement` (completed/failed) → `updateTag` → redirect a confirmación con un `transactionId` generado server-side (`Date.now()`, mismo patrón que los contactos) |
 | `getSavedContacts` | `app/transactions/actions.ts` | GET `/saved-contacts` fusionado con contactos creados |
 | `logout` | `components/actions.ts` | Borra sesión, redirect a `/` |
 
@@ -261,7 +261,7 @@ lib/
 ├── contacts.ts                   # Store de contactos creados
 ├── session.ts                    # getSession / setSession / clearSession
 └── format.ts                     # roundMoney / formatCurrency (MXN)
-types/types.tsx                   # AlertProps, errors, User, Movement, SavedContact
+types/types.ts                    # AlertProps, User, Movement, SavedContact
 wiremock/mappings/                # Stubs: users, user, user-{2,3,4},
                                   #   movement-list{-2,-3,-4}, movement-create,
                                   #   saved-contacts
@@ -297,8 +297,31 @@ Dockerfile / docker-compose.yml / Makefile
 - **Validación de inputs**: formato de usuario y contraseña en `loginUser`; monto > 0 (incl. `NaN`/`Infinity`), motivo, contacto y saldo contra balance real en `sendTransaction` — todas server-side, no solo en la UI.
 - **Secretos**: ninguno en el código; las variables son URLs públicas del mock.
 - **Acciones expuestas**: los módulos `"use server"` son endpoints RPC públicos; las validaciones viven ahí precisamente porque la UI es bypasseable.
-- **Riesgos conocidos (demo)**: los datos del comprobante viajan en la URL (visibles y editables), y la cookie `secure: true` depende de que el navegador trate `localhost` como contexto seguro (Chromium sí; Safari no).
+- **Riesgos conocidos (demo)**: los datos del comprobante viajan en la URL (visibles y editables). La cookie se marca `secure` solo en producción (`NODE_ENV === "production"`); en desarrollo se omite para que el login funcione en cualquier navegador sobre `localhost` http.
 
-## 8. Tiempo invertido
+## 6. Áreas de mejora
+
+Con más tiempo, en orden de prioridad:
+
+### Arquitectura
+- Persistencia real (SQLite) en lugar de stores en memoria — los `Map` de `lib/movements.ts` y `lib/contacts.ts` viven por proceso y se pierden ante un restart o escala horizontal.
+- `cacheTag` por usuario (`user:${id}`) en `getUser`/`getMovements`; hoy `updateTag("user")` invalida el cache de todos los usuarios.
+- Datos del comprobante fuera de la query string: persistir el movimiento por id y leerlo server-side en la confirmación.
+- Cargar los contactos server-side y pasarlos como prop, en vez del fetch client-side de `useContacts`.
+
+### Next.js
+- `error.tsx` por ruta (hoy solo `home` tiene boundary propio).
+- Timeout/`AbortController` en `apiGet`/`apiPost`/`proxyToMock` para no colgar requests si el upstream no responde.
+
+### Testing
+- Tests de `lib/` (`roundMoney`, `formatCurrency`, `proxyToMock` 502, stores).
+- E2E de error paths (reintento en 408/500, fondos insuficientes) con escenario de caos determinista.
+
+### Producto
+- Autenticación real (JWT o sesión firmada) y endpoints protegidos con token.
+- Idempotencia al enviar transacciones; eliminación/actualización de movimientos.
+- a11y en modales (`role="dialog"`, `aria-modal`, cierre con Escape, focus trap).
+
+## 7. Tiempo invertido
 
 12 horas invertidas

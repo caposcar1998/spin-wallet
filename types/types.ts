@@ -1,17 +1,12 @@
-export type AlertType = "success" | "error" | "warning" | "info";
+import type { ReactNode } from "react";
 
-export const errors = {
-  "500": "Error de red",
-  "400": "Fondos insuficientes",
-  "408": "Timeout de red",
-  "520": "Error desconocido",
-} as const;
+export type AlertType = "success" | "error" | "warning" | "info";
 
 export interface AlertProps {
   type: AlertType;
   isOpen?: boolean;
   onClose?: () => void;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 export interface Movement {
@@ -20,7 +15,7 @@ export interface Movement {
   amount: number;
   date: string;
   extra: string;
-  status: string;
+  status: "completed" | "failed";
   contact?: string;
   transactionId?: string;
 }

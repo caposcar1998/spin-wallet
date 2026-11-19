@@ -1,8 +1,14 @@
 import { Title } from "@/components/general/title";
 import { DetailTable } from "@/components/general/detailTable";
 import { formatCurrency } from "@/lib/format";
-import { errors } from "@/types/types";
 import { ActionTransaction } from "./actionTransaction";
+
+const errors = {
+  "500": "Error de red",
+  "400": "Fondos insuficientes",
+  "408": "Timeout de red",
+  "520": "Error desconocido",
+} as const;
 
 export const instant = false;
 

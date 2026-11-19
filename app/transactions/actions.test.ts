@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { sendTransaction } from "./actions";
-import { apiPost } from "@/lib/api";
+import { getSavedContacts, saveContact, sendTransaction } from "./actions";
+import { apiGet, apiPost } from "@/lib/api";
 import { getUser } from "@/lib/users";
 import { getSession } from "@/lib/session";
 import { addMovement } from "@/lib/movements";
@@ -27,6 +27,7 @@ vi.mock("next/navigation", () => ({
 const mockGetSession = vi.mocked(getSession);
 const mockGetUser = vi.mocked(getUser);
 const mockApiPost = vi.mocked(apiPost);
+const mockApiGet = vi.mocked(apiGet);
 const mockAddMovement = vi.mocked(addMovement);
 const mockUpdateTag = vi.mocked(updateTag);
 
@@ -147,5 +148,31 @@ describe("sendTransaction", () => {
     await expect(sendTransaction(undefined, makeFormData())).rejects.toThrow(
       /cantidad=50&motivo=Pago\+test&contacto=hector/,
     );
+  });
+});
+
+describe("getSavedContacts", () => {
+  it("redirects to /login when there is no session", async () => {
+    mockGetSession.mockResolvedValue(null);
+    await expect(getSavedContacts()).rejects.toThrow("NEXT_REDIRECT:/login");
+  });
+
+  it("returns the stub contacts merged with created ones", async () => {
+    mockGetSession.mockResolvedValue("1");
+    mockApiGet.mockResolvedValue(
+      new Response(
+        JSON.stringify({ data: [{ id: 9, name: "nueve", email: "nueve@x.com" }] }),
+        { status: 200 },
+      ),
+    );
+    const contacts = await getSavedContacts();
+    expect(contacts).toEqual([{ id: 9, name: "nueve", email: "nueve@x.com" }]);
+  });
+});
+
+describe("saveContact", () => {
+  it("redirects to /login when there is no session", async () => {
+    mockGetSession.mockResolvedValue(null);
+    await expect(saveContact("a", "a@b.com")).rejects.toThrow("NEXT_REDIRECT:/login");
   });
 });

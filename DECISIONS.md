@@ -18,15 +18,15 @@ tests/           e2e separado; los unit tests van colocalizados junto al archivo
 - `wiremock/` el backend mockeado, vive fuera del código de la app
 - `tests/` e2e separado; los unit tests van colocalizados junto al archivo
 
-## Validaciones frontend backend
+## Validaciones frontend y backend
 
 - Se realizan validaciones en el frontend para mejorar la experiencia del usuario, pero la validación real se realiza en el backend para garantizar la integridad de los datos.
-- Se utilizan librerias como zod para validar los datos en el backend.
+- No se agregó una librería de validación (zod u otra): el scope es acotado (formato de login, monto, motivo, contacto y saldo) y las validaciones nativas en las Server Actions lo cubren; una dependencia extra no se justifica para este challenge.
 
 ## Cookies
 
 - Se utilizan las cookies para almacenar la información del usuario y la sesión.
-- Con ellas se puede mantener la sesión del usuario, redireccionar usaurios no registrados y hacer queries con el permiso del usuario.
+- Con ellas se puede mantener la sesión del usuario, redireccionar usuarios no registrados y hacer queries con el permiso del usuario.
 
 ## Estados de la aplicación
 
@@ -46,7 +46,7 @@ No uso Context/Zustand/Redux. Esto por:
 
 `components/general/` tiene lo generico: `CustomButton`, `CustomInput`, `Title`, `SubTitle`, `DetailTable`, `Alert`, `BackButton`, `CloseButton`, `GeneralText`.
 - La condición es: se reutiliza solo si ya se usa en más de 2 lugares diferentes. 
-- Se realizó esto para lograr tener homogeneadidad en el proyecto.
+- Se realizó esto para lograr tener homogeneidad en el proyecto.
 
 ## Uso de server side components y client side components combinados
 
@@ -69,17 +69,17 @@ Ejemplo real de cómo ayudó — el home:
 ## Uso de cache
 
 - `getUser` y `getMovements` usan `"use cache"` con `cacheLife("minutes")` y `cacheTag("user")`. Forzar a usar lo que se tiene en cache.
-- `sendTransaction` llama `updateTag("user")` tras registrar el movimiento — invalida balance y lista juntos . Sin esto el home información cacheada sin actualizar.
+- `sendTransaction` llama `updateTag("user")` tras registrar el movimiento — invalida balance y lista juntos. Sin esto el home información cacheada sin actualizar.
 
 ## Uso de suspense
 
 - `home/page.tsx` envuelve `UserData` y `Movements` en `<Suspense>` separados . Esto para permitir cargar cada componente de manera independiente.
-- `app/loading.tsx` cubre la carga inicial de ruta. Se realizo por practicidad.
+- `app/loading.tsx` cubre la carga inicial de ruta. Se realizó por practicidad.
 
 ## Uso de error boundaries
 
 - `app/home/error.tsx` es el boundary del segmento, se realizo de esta manera ya que el home es el punto de entrada de la aplicación y es donde se espera que haya más errores.
-- Solo `home` tiene `error.tsx` propio — el resto de rutas cae en la página de error raíz. Queda como mejora pendiente., se realizo de esta manera par demostrar el uso de error boundaries.
+- Solo `home` tiene `error.tsx` propio — el resto de rutas cae en la página de error raíz. Queda como mejora pendiente. Se realizó de esta manera para demostrar el uso de error boundaries.
 
 ## Layout general
 
@@ -108,7 +108,7 @@ Ejemplo real de cómo ayudó — el home:
 - Implementar autenticación con JWT, o al menos proteger el endpoint de login con un token
 - Implementar endpoints con tokens
 - Implementar un correcto CI/CD
-- Revisión más profunda de edge cases, 2 días no permite ver todos los casos posibles
+- Revisión más profunda de edge cases, 12 horas no permiten ver todos los casos posibles
 - Implementar casos de uso más interesantes, como idempotencia al enviar transacciones
 - Eliminación de transacciones
 - Actualización de transacciones
