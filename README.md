@@ -8,6 +8,8 @@ Mini wallet web construida con **Next.js 16 + TypeScript + Tailwind CSS 4** que 
 Login → Home → Nueva Transacción → Confirmación / Comprobante
 ```
 
+![home](image.png)
+
 La app **no se conecta a servicios reales**: los datos provienen de **WireMock** (contenedor Docker en `:8080`), que sirve usuarios, saldo, movimientos y contactos guardados. Los Route Handlers propios (`app/api/`) actúan como proxy hacia WireMock, y dos stores en memoria del proceso del servidor (`lib/movements.ts`, `lib/contacts.ts`) simulan la persistencia de datos creados, ya que WireMock es stateless.
 
 Funcionalidades principales:
