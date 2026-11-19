@@ -2,8 +2,6 @@
 
 up:
 	docker compose up -d --build
-	sleep 5
-	npm run dev
 
 down:
 	docker compose down
