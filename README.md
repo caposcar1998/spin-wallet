@@ -15,7 +15,7 @@ La app **no se conecta a servicios reales**: los datos provienen de **WireMock**
 Funcionalidades principales:
 
 - Login con validación de formato (email o teléfono), lookup del usuario contra el mock y sesión por cookie.
-- Home con saldo disponible, nombre de usuario y lista de movimientos — por usuario (4 usuarios demo con datos propios).
+- Home con saldo disponible, nombre de usuario y lista de movimientos — por usuario (4 usuarios demo con datos propios) — con búsqueda en vivo (descripción, motivo, monto o fecha) y tabla con scroll a partir de un límite de filas visibles.
 - Envío de dinero: monto (con decimales), motivo, selección de contacto favorito o alta de contacto nuevo (persistido server-side).
 - Resumen de confirmación antes de enviar.
 - Comprobante con escenarios aleatorios: éxito, fondos insuficientes, error de red, timeout y error desconocido, con opción de reintento.
@@ -44,6 +44,10 @@ Copiar el archivo `.env.example` a `.env`, en caso de usar `make up` no es neces
 | `MOCK_API_URL` | No | `http://localhost:8080` | Servidor | Upstream al que los Route Handlers proxifican (WireMock). En docker-compose apunta a `http://wiremock:8080` |
 | `API_CHAOS` | No | `true` | Servidor | `"false"` desactiva la inyección de errores aleatorios en `POST /api/user/:id/movements`. Lo usa Playwright vía `webServer` |
 | `FAKE_ERROR_LOGIN` | No | `false` | Servidor | `"true"` hace que `getUsers` devuelva `[]` (→ "Usuario no registrado") y agrega 2s de latencia en `getUser` |
+| `API_TIMEOUT_MS` | No | `10000` | Servidor | Timeout en ms de `apiGet`/`apiPost` contra la API propia. Bájalo (p. ej. `2000`) para ver el comprobante `408` sin esperar |
+| `CHAOS_DELAY_MS` | No | `5000` | Servidor | Ms que duerme cada POST de transacción cuando el caos está activo (`API_CHAOS≠false`) — todos los flujos responden lento. Súbelo por encima de `API_TIMEOUT_MS` para que todos terminen en timeout |
+| `LOGIN_DELAY_MS` | No | `500` | Servidor | Ms que espera `loginUser` antes de redirigir a `/home` (latencia simulada de login) |
+| `CHAOS_408_DELAY_MS` | No | `3000` | Servidor | Ms extra que duerme la rama `408` del caos — se suman a `CHAOS_DELAY_MS` — para simular el hang de red |
 
 ```bash
 cp .env.example .env   # variables locales (ver tabla abajo)
@@ -196,13 +200,15 @@ Server Component / Action
          → WireMock :8080
 ```
 
-**Route Handlers** (`app/api/`): proxifican a WireMock vía `proxyToMock`. El `POST /user/{id}/movements` además inyecta **caos por request**: 25% proxifica real a WireMock, 15% `500`, 20% `400` (fondos insuficientes), 20% `408` (con delay de 5s simulando timeout), 20% `520`. Es el motor de los escenarios aleatorios del comprobante. El kill-switch `API_CHAOS=false` lo desactiva (lo usan los tests E2E para un happy path determinista). El caos vive en la capa de API — `apiPost` es transporte puro que cualquier consumidor puede usar sin heredar fallos aleatorios.
+**Route Handlers** (`app/api/`): proxifican a WireMock vía `proxyToMock`. El `POST /user/{id}/movements` además inyecta **caos por request**: con el caos activo, cada POST espera `CHAOS_DELAY_MS` (default 5s) antes de responder — todos los flujos son lentos — y luego sortea: 25% proxifica real a WireMock, 15% `500`, 20% `400` (fondos insuficientes), 20% `408` (Timeout de red — espera `CHAOS_408_DELAY_MS` extra, default 3s, para simular el hang), 20% `520`. Es el motor de los escenarios aleatorios del comprobante. El kill-switch `API_CHAOS=false` lo desactiva (lo usan los tests E2E para un happy path determinista). El caos vive en la capa de API — `apiPost` es transporte puro que cualquier consumidor puede usar sin heredar fallos aleatorios.
+
+Ambas capas HTTP usan `AbortSignal.timeout`: `API_TIMEOUT_MS` (default 10s) en `apiGet`/`apiPost` y 5s en `proxyToMock`; el caos duerme `CHAOS_DELAY_MS` (default 5s) en cada POST cuando está activo. Si WireMock no contesta a tiempo, el proxy responde `504`; si el timeout ocurre en `sendTransaction`, el comprobante muestra `408` (Timeout de red) en vez de `520`.
 
 **Server Actions** (`"use server"`):
 
 | Action | Archivo | Rol |
 |---|---|---|
-| `loginUser` | `app/login/actions.ts` | Valida formato y contraseña → lookup del usuario en `getUsers()` (email o teléfono) → cookie `userId` con su id → delay de 2s → redirect a `/home` |
+| `loginUser` | `app/login/actions.ts` | Valida formato y contraseña → lookup del usuario en `getUsers()` (email o teléfono) → cookie `userId` con su id → delay de `LOGIN_DELAY_MS` (default 0.5s) → redirect a `/home` |
 | `sendTransaction` | `app/transactions/actions.ts` | Valida monto/motivo/contacto/saldo → `apiPost` → `addMovement` (completed/failed) → `updateTag` → redirect a confirmación con un `transactionId` generado server-side (`Date.now()`, mismo patrón que los contactos) |
 | `getSavedContacts` | `app/transactions/actions.ts` | GET `/saved-contacts` fusionado con contactos creados |
 | `logout` | `app/login/actions.ts` | Borra sesión, redirect a `/` |
@@ -220,7 +226,7 @@ Las llamadas son **100% server-side**; ninguna URL ni respuesta de WireMock lleg
 
 ### 3.4 Procesos en segundo plano
 
-No hay polling, WebSockets, timers ni cron jobs. Lo más cercano: el delay de 5s en la rama `408` del route handler (simula timeout) y el delay de 2s en `loginUser`/`getUser` (simula latencia).
+No hay polling, WebSockets, timers ni cron jobs. Lo más cercano: el delay global `CHAOS_DELAY_MS` del caos en cada POST, los `CHAOS_408_DELAY_MS` extra de la rama `408` (simulan el hang del timeout) y `LOGIN_DELAY_MS` en `loginUser` / 2s en `getUser` con `FAKE_ERROR_LOGIN=true` (simulan latencia).
 
 ### 3.5 Árbol de módulos
 
@@ -256,6 +262,7 @@ components/
 └── general/                      # button, input, title, detailTable, backButton…
 lib/
 ├── api.ts                        # Cliente HTTP base (apiGet/apiPost, sin lógica)
+├── api-paths.ts                  # USERS_PATH / userPath / userMovementsPath — paths compartidos
 ├── mock-api.ts                   # proxyToMock — boundary hacia WireMock
 ├── users.ts                      # getUser / getMovements ("use cache") / getUsers
 ├── movements.ts                  # Store de movimientos creados (por usuario)
@@ -268,7 +275,7 @@ wiremock/mappings/                # Stubs: users, user, user-{2,3,4},
                                   #   saved-contacts
 proxy.ts                          # Guard de rutas por cookie
 tests/wallet-flow.spec.ts         # Playwright E2E del flujo completo
-**/*.test.ts(x)                   # Suites Vitest colocalizadas (50 tests)
+**/*.test.ts(x)                   # Suites Vitest colocalizadas (63 tests)
 vitest.config.ts / vitest.setup.ts
 playwright.config.ts              # webServer: API_CHAOS=false npm run dev
 Dockerfile / docker-compose.yml / Makefile
@@ -312,10 +319,9 @@ Con más tiempo, en orden de prioridad:
 
 ### Next.js
 - `error.tsx` por ruta (hoy solo `home` tiene boundary propio).
-- Timeout/`AbortController` en `apiGet`/`apiPost`/`proxyToMock` para no colgar requests si el upstream no responde.
 
 ### Testing
-- Tests de `lib/` (`roundMoney`, `formatCurrency`, `proxyToMock` 502, stores).
+- Tests de `lib/` (`roundMoney`, `formatCurrency`, stores).
 - E2E de error paths (reintento en 408/500, fondos insuficientes) con escenario de caos determinista.
 
 ### Producto

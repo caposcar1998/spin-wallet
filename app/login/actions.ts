@@ -5,6 +5,10 @@ import { cookies } from "next/headers";
 import { clearSession } from "@/lib/session";
 import { getUsers } from "@/lib/users";
 
+const LOGIN_DELAY_MS = process.env.LOGIN_DELAY_MS
+  ? Number(process.env.LOGIN_DELAY_MS)
+  : 500;
+
 export async function loginUser(
   _: undefined | { error: string },
   formData: FormData,
@@ -36,7 +40,7 @@ export async function loginUser(
     sameSite: "lax",
     maxAge: 5 * 60,
   });
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, LOGIN_DELAY_MS));
   redirect("/home");
 }
 

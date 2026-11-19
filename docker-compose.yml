@@ -12,6 +12,12 @@ services:
       - "3000:3000"
     environment:
       - MOCK_API_URL=http://wiremock:8080
+      - API_TIMEOUT_MS=10000
+      - CHAOS_DELAY_MS=0
+      - FAKE_ERROR_LOGIN=false
+      - API_CHAOS=true
+      - LOGIN_DELAY_MS=500
+      - CHAOS_408_DELAY_MS=3000
     depends_on:
       - wiremock
 

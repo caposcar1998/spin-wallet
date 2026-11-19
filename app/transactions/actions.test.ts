@@ -143,6 +143,16 @@ describe("sendTransaction", () => {
     expect(mockAddMovement).not.toHaveBeenCalled();
   });
 
+  it("redirects to the timeout receipt (408) when the request times out", async () => {
+    mockApiPost.mockRejectedValue(
+      new DOMException("fetch timed out", "TimeoutError"),
+    );
+    await expect(sendTransaction(undefined, makeFormData())).rejects.toThrow(
+      /NEXT_REDIRECT:\/transactions\/confirmation\/408\//,
+    );
+    expect(mockAddMovement).not.toHaveBeenCalled();
+  });
+
   it("carries cantidad, motivo and contacto in the confirmation URL", async () => {
     mockApiPost.mockResolvedValue(new Response("{}", { status: 201 }));
     await expect(sendTransaction(undefined, makeFormData())).rejects.toThrow(

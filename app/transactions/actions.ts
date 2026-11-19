@@ -53,8 +53,12 @@ export async function sendTransaction(
       motivo: String(motivo).trim(),
       contacto,
     });
-  } catch {
-    redirect(`/transactions/confirmation/520/${transactionId}?${params}`);
+  } catch (error) {
+    const status =
+      error instanceof DOMException && error.name === "TimeoutError"
+        ? 408
+        : 520;
+    redirect(`/transactions/confirmation/${status}/${transactionId}?${params}`);
   }
 
   addMovement(session, {
